@@ -1,0 +1,25 @@
+#https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV0SIKuP9XjQELiZtQMCeKi2IWR-sYkCYOEV6wjNta1Zy4BhJ-qG-hAbSqxoSqhrTUTb2l_AZbEm3USdwkDK0pViKVbfzD3Ju2-85y1HpQzcXw==
+
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: simplest
+spec:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    
+    processors:
+
+    exporters:
+      debug:
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: []
+          exporters: [debug]
