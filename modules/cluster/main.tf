@@ -8,7 +8,7 @@ module "eks" {
   subnet_ids               = var.private_subnet_ids
   control_plane_subnet_ids = var.public_subnet_ids
 
-  cluster_endpoint_public_access = false
+  cluster_endpoint_public_access = true
 
   cloudwatch_log_group_retention_in_days = 7
 
