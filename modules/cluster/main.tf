@@ -8,7 +8,7 @@ module "eks" {
   subnet_ids               = var.private_subnet_ids
   control_plane_subnet_ids = var.public_subnet_ids
 
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access = false
 
   cloudwatch_log_group_retention_in_days = 7
 
@@ -42,8 +42,6 @@ module "eks" {
       ]
     }
   ]
-  aws_auth_users    = []
-  aws_auth_accounts = []
 
   fargate_profiles = {
     karpenter = {
@@ -65,7 +63,7 @@ module "eks" {
   }
 }
 
-resource "aws_iam_service_linked_role" "elasticbeanstalk" {
+resource "aws_iam_service_linked_role" "spot" {
   count = length(data.aws_iam_roles.spot.names) > 0 ? 0 : 1
 
   aws_service_name = "spot.amazonaws.com"
