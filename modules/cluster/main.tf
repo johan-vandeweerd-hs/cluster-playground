@@ -60,6 +60,22 @@ module "eks" {
         { namespace = "kube-system" }
       ]
     }
+    opentelemetry-operator-system = {
+      iam_role_name            = "${var.name}-fargate-opentelemetry-operator-system"
+      iam_role_use_name_prefix = false
+      iam_role_description     = "TF: IAM role used by Fargate for opentelemetry-operator-system profile"
+      selectors                = [
+        { namespace = "opentelemetry-operator-system" }
+      ]
+    }
+    cert-manager = {
+      iam_role_name            = "${var.name}-fargate-cert-manager"
+      iam_role_use_name_prefix = false
+      iam_role_description     = "TF: IAM role used by Fargate for cert-manager profile"
+      selectors                = [
+        { namespace = "cert-manager" }
+      ]
+    }
   }
 }
 
@@ -150,6 +166,10 @@ module "eks_blueprints_addons" {
     create_namespace = true
     namespace        = "metrics-server"
   }
+
+  depends_on = [
+    module.eks.fargate_profiles
+  ]
 }
 
 resource "time_sleep" "wait_for_eks_blueprints_addons" {
