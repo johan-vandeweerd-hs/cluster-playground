@@ -4,7 +4,7 @@
 
 # Setup
 
-## Create environment
+## Cluster
 
 ```sh
 export TF_VAR_contributor="<YOUR_NAME_ALL_LOWERCASE>"
@@ -18,4 +18,19 @@ When the cluster is running, you need the following commands to update your kube
 ```
 hootctl sync iam-role user-sandbox-admin -d
 aws eks update-kubeconfig --name cluster-playground-${TF_VAR_contributor}
+```
+
+## Argocd
+
+To access Argocd, port-forward the Argocd server to a local port.
+
+```
+kubectl port-forward -n argocd service/argo-cd-argocd-server 8000:443
+```
+
+Browse to [https://localhost:8000](https://localhost:8000) and login with username `admin`.  
+Get the password from the`argocd-initial-admin-secret` 
+
+```
+kubectl get secret -n argocd argocd-initial-admin-secret -ojson | jq -r '.data.password' | base64 -d 
 ```

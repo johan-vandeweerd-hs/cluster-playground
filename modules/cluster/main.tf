@@ -129,8 +129,10 @@ module "eks_blueprints_addons" {
     }
   }
 
-  enable_argocd = false
-  argocd        = {}
+  enable_argocd = true
+  argocd        = {
+    values = [file("${path.module}/extras/argocd-values.yaml")]
+  }
 
   enable_aws_load_balancer_controller = false
   aws_load_balancer_controller        = {}
@@ -176,6 +178,40 @@ data "aws_iam_policy_document" "no_op" {
     effect    = "Allow"
     actions   = ["none:null"]
     resources = ["*"]
+  }
+}
+
+resource "aws_iam_role" "argocd" {
+  name               = "${module.eks.cluster_name}-argocd"
+  description        = "TF: IAM role assumed by External Secrets to get the secrets of Argocd."
+  assume_role_policy = data.aws_iam_policy_document.argocd_assume.json
+
+  inline_policy {
+    name   = "read-secrets-manager"
+    policy = data.aws_iam_policy_document.argocd_secrets_manager.json
+  }
+}
+
+data "aws_iam_policy_document" "argocd_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "AWS"
+      identifiers = [module.eks_blueprints_addons.external_secrets.iam_role_arn]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "argocd_secrets_manager" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:${data.aws_caller_identity.this.account_id}:secret:${module.eks.cluster_name}/argocd/*"
+    ]
   }
 }
 
