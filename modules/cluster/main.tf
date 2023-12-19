@@ -141,8 +141,24 @@ module "eks_blueprints_addons" {
   enable_external_dns = false
   external_dns        = {}
 
-  enable_external_secrets = false
-  external_secrets        = {}
+  enable_external_secrets = true
+  external_secrets        = {
+    namespace            = "external-secrets"
+    service_account_name = "external-secrets"
+
+    create_role          = true
+    role_name            = "${module.eks.cluster_name}-external-secrets"
+    role_name_use_prefix = false
+    role_description     = "TF: IAM role used by External Secrets for IRSA."
+
+    policy_name             = "no-op"
+    policy_name_use_prefix  = false
+    policy_description      = "TF: IAM policy for External Secrets in the ${module.eks.cluster_name} cluster."
+    source_policy_documents = [data.aws_iam_policy_document.no_op.json]
+  }
+  external_secrets_ssm_parameter_arns   = []
+  external_secrets_secrets_manager_arns = []
+  external_secrets_kms_key_arns         = []
 
   enable_metrics_server = true
   metrics_server        = {
@@ -153,6 +169,14 @@ module "eks_blueprints_addons" {
   depends_on = [
     module.eks.fargate_profiles
   ]
+}
+
+data "aws_iam_policy_document" "no_op" {
+  statement {
+    effect    = "Allow"
+    actions   = ["none:null"]
+    resources = ["*"]
+  }
 }
 
 resource "kubectl_manifest" "this" {
