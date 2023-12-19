@@ -99,9 +99,6 @@ module "eks_blueprints_addons" {
     eks-pod-identity-agent = {
       most_recent = true
     }
-    adot = {
-      most_recent = true
-    }
     coredns = {
       most_recent          = true
       configuration_values = jsonencode({
