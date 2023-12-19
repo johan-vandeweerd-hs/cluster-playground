@@ -110,18 +110,18 @@ module "eks_blueprints_addons" {
   enable_karpenter = true
   karpenter        = {
     create_role          = true
-    role_name            = "${var.name}-karpenter"
+    role_name            = "${module.eks.cluster_name}-karpenter"
     role_name_use_prefix = false
     role_description     = "TF: IAM Role used by Karptener for IRSA."
     role_policies        = {}
 
-    policy_name            = "${var.name}-karpenter"
+    policy_name            = "${module.eks.cluster_name}-karpenter"
     policy_name_use_prefix = false
     policy_description     = "TF: Policy used by Karpenter role."
   }
   karpenter_node = {
     create_iam_role              = true
-    iam_role_name                = "${var.name}-karpenter-node"
+    iam_role_name                = "${module.eks.cluster_name}-karpenter-node"
     iam_role_use_name_prefix     = false
     iam_role_description         = "TF: IAM role used by Karpenter managed nodes."
     iam_role_additional_policies = {
