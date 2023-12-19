@@ -21,11 +21,11 @@ module "eks" {
 
   iam_role_name            = "${var.name}-cluster"
   iam_role_use_name_prefix = false
-  iam_role_description     = "TF: IAM role used by the ${var.name} cluster"
+  iam_role_description     = "TF: IAM role used by the ${var.name} cluster."
 
   cluster_encryption_policy_name            = "${var.name}-encryption"
   cluster_encryption_policy_use_name_prefix = false
-  cluster_encryption_policy_description     = "TF: IAM policy used by the ${var.name} cluster for encryption"
+  cluster_encryption_policy_description     = "TF: IAM policy used by the ${var.name} cluster for encryption."
 
   manage_aws_auth_configmap = true
   aws_auth_roles            = [
@@ -43,7 +43,7 @@ module "eks" {
     karpenter = {
       iam_role_name            = "${var.name}-fargate-karpenter"
       iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile"
+      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
       selectors                = [
         { namespace = "karpenter" }
       ]
@@ -125,18 +125,18 @@ module "eks_blueprints_addons" {
     create_role          = true
     role_name            = "${var.name}-karpenter"
     role_name_use_prefix = false
-    role_description     = "TF: IAM Role used by Karptener for IRSA"
+    role_description     = "TF: IAM Role used by Karptener for IRSA."
     role_policies        = {}
 
     policy_name            = "${var.name}-karpenter"
     policy_name_use_prefix = false
-    policy_description     = "TF: Policy used by Karpenter role"
+    policy_description     = "TF: Policy used by Karpenter role."
   }
   karpenter_node = {
     create_iam_role              = true
     iam_role_name                = "${var.name}-karpenter-node"
     iam_role_use_name_prefix     = false
-    iam_role_description         = "TF: IAM role used by Karpenter managed nodes"
+    iam_role_description         = "TF: IAM role used by Karpenter managed nodes."
     iam_role_additional_policies = {
       AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
     }
