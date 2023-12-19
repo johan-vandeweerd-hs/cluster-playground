@@ -51,25 +51,15 @@ module "eks" {
     kube-system = {
       iam_role_name            = "${var.name}-fargate-kube-system"
       iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for kube-system profile"
+      iam_role_description     = "TF: IAM role used by Fargate for kube-system profile."
       selectors                = [
-        { namespace = "kube-system" }
-      ]
-    }
-    opentelemetry-operator-system = {
-      iam_role_name            = "${var.name}-fargate-opentelemetry-operator-system"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for opentelemetry-operator-system profile"
-      selectors                = [
-        { namespace = "opentelemetry-operator-system" }
-      ]
-    }
-    cert-manager = {
-      iam_role_name            = "${var.name}-fargate-cert-manager"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for cert-manager profile"
-      selectors                = [
-        { namespace = "cert-manager" }
+        {
+          namespace = "kube-system"
+          labels    = {
+            "eks.amazonaws.com/component" = "coredns"
+            "k8s-app"                     = "kube-dns"
+          }
+        }
       ]
     }
   }
