@@ -165,29 +165,14 @@ module "eks_blueprints_addons" {
   ]
 }
 
-resource "time_sleep" "wait_for_eks_blueprints_addons" {
-  depends_on = [module.eks_blueprints_addons]
+resource "kubectl_manifest" "this" {
+  for_each = toset(fileset("${path.module}/extras/manifests", "**/*"))
 
-  create_duration = "120s"
-}
-
-resource "kubectl_manifest" "karpenter_node_class" {
-  yaml_body = templatefile("${path.module}/manifests/karpenter/node-class.yaml", {
-    "clusterName" = var.name,
-    "defaultTags" = data.aws_default_tags.this.tags
+  yaml_body = templatefile("${path.module}/extras/manifests/${each.value}", {
+    awsAccountId = data.aws_caller_identity.this.account_id
+    clusterName  = module.eks.cluster_name
+    defaultTags  = data.aws_default_tags.this.tags
   })
 
-  depends_on = [time_sleep.wait_for_eks_blueprints_addons]
+  depends_on = [module.eks_blueprints_addons]
 }
-
-resource "kubectl_manifest" "karpenter_node_pool" {
-  yaml_body = templatefile("${path.module}/manifests/karpenter/node-pool.yaml", { CLUSTER_NAME = var.name })
-
-  depends_on = [time_sleep.wait_for_eks_blueprints_addons]
-}
-
-#resource "kubectl_manifest" "adot_collector" {
-#  yaml_body = templatefile("${path.module}/manifests/adot_collector.yaml", { CLUSTER_NAME = var.name })
-#
-#  depends_on = [time_sleep.wait_for_eks_blueprints_addons]
-#}
