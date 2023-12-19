@@ -12,14 +12,10 @@ module "eks" {
 
   cloudwatch_log_group_retention_in_days = 7
 
-  cluster_security_group_name            = "${var.name}-cluster"
-  cluster_security_group_use_name_prefix = false
-  cluster_security_group_description     = "TF: Security group used by the ${var.name} cluster"
-
-  node_security_group_name            = "${var.name}-node"
-  node_security_group_use_name_prefix = false
-  node_security_group_description     = "TF: Security group used by the nodes of the ${var.name} cluster"
-  node_security_group_tags            = {
+  create_cluster_primary_security_group_tags = true
+  create_cluster_security_group              = false
+  create_node_security_group                 = false
+  cluster_tags                               = {
     "karpenter.sh/discovery" = var.name
   }
 
