@@ -134,15 +134,6 @@ module "eks_blueprints_addons" {
     values = [file("${path.module}/extras/argocd-values.yaml")]
   }
 
-  enable_aws_load_balancer_controller = false
-  aws_load_balancer_controller        = {}
-
-  enable_cert_manager = true
-  cert_manager        = {}
-
-  enable_external_dns = false
-  external_dns        = {}
-
   enable_external_secrets = true
   external_secrets        = {
     namespace            = "external-secrets"
@@ -161,12 +152,6 @@ module "eks_blueprints_addons" {
   external_secrets_ssm_parameter_arns   = []
   external_secrets_secrets_manager_arns = []
   external_secrets_kms_key_arns         = []
-
-  enable_metrics_server = true
-  metrics_server        = {
-    create_namespace = true
-    namespace        = "metrics-server"
-  }
 
   depends_on = [
     module.eks.fargate_profiles
