@@ -1,5 +1,3 @@
-resource "random_pet" "for_robert" {}
-
 locals {
   name            = "cluster-playground-${var.contributor}"
   vpc_cidr        = "10.0.0.0/16"

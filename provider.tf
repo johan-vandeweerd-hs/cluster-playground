@@ -21,7 +21,6 @@ provider "aws" {
       Project     = "hackathon-dec-2023"
       Team        = "Awesome"
       Contributor = var.contributor
-      Petname     = random_pet.for_robert.id
     }
   }
 }
