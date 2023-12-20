@@ -13,6 +13,11 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      parameters: %{ if length(helm_parameters) == 0 }[]%{endif}
+%{ for key, value in helm_parameters ~}
+        - name: "${key}"
+          value: "${value}"
+%{ endfor ~}
   project: default
   destination:
     namespace: ${namespace}
