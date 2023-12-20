@@ -1,0 +1,36 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: simple
+spec:
+  mode: deployment
+  imagePullPolicy: Always
+  managementState: managed
+  podDisruptionBudget:
+    maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      memory: 500Mi
+  autoscaler:
+    minReplicas: 2
+    maxReplicas: 5
+  serviceAccount: open-telemetry
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+    processors:
+    exporters:
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers:
+            - otlp
+          processors: []
+          exporters:
+            - debug

@@ -30,3 +30,15 @@ module "cluster" {
   private_subnet_ids = module.network.private_subnet_ids
   public_subnet_ids  = module.network.public_subnet_ids
 }
+
+module "open_telemetry" {
+  source = "./modules/platform/open-telemetry"
+
+  revision = var.contributor
+
+  cluster_name                       = module.cluster.cluster_name
+  cluster_endpoint                   = module.cluster.cluster_endpoint
+  cluster_certificate_authority_data = module.cluster.cluster_certificate_authority_data
+  cluster_oidc_provider              = module.cluster.cluster_oidc_provider
+  cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
+}

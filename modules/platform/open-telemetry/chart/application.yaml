@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${name}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  source:
+    repoURL: git@github.hootops.com:hackathon/cluster-playground.git
+    path: modules/platform/${name}/chart
+    targetRevision: ${revision}
+    helm:
+      valueFiles:
+        - values.yaml
+  project: default
+  destination:
+    namespace: ${namespace}
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
