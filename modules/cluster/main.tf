@@ -1,5 +1,5 @@
 module "eks" {
-  source = "registry.terraform.io/terraform-aws-modules/eks/aws"
+  source = "terraform-aws-modules/eks/aws"
 
   cluster_name    = var.name
   cluster_version = var.cluster_version
