@@ -39,47 +39,7 @@ module "eks" {
     }
   ]
 
-  fargate_profiles = {
-    karpenter = {
-      iam_role_name            = "${var.name}-fargate-karpenter"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
-      selectors                = [
-        { namespace = "karpenter" }
-      ]
-    }
-    kube-system = {
-      iam_role_name            = "${var.name}-fargate-kube-system"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for kube-system profile."
-      selectors                = [
-        {
-          namespace = "kube-system"
-          labels    = {
-            "eks.amazonaws.com/component" = "coredns"
-            "k8s-app"                     = "kube-dns"
-          }
-        }
-      ]
-    }
-  }
-}
-
-resource "aws_iam_service_linked_role" "spot" {
-  count = length(data.aws_iam_roles.spot.names) > 0 ? 0 : 1
-
-  aws_service_name = "spot.amazonaws.com"
-}
-
-module "eks_blueprints_addons" {
-  source = "registry.terraform.io/aws-ia/eks-blueprints-addons/aws"
-
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_version   = module.eks.cluster_version
-  oidc_provider_arn = module.eks.oidc_provider_arn
-
-  eks_addons = {
+  cluster_addons = {
     kube-proxy = {
       most_recent = true
     }
@@ -107,107 +67,81 @@ module "eks_blueprints_addons" {
     }
   }
 
-  enable_karpenter = true
-  karpenter        = {
-    create_role          = true
-    role_name            = "${module.eks.cluster_name}-karpenter"
-    role_name_use_prefix = false
-    role_description     = "TF: IAM Role used by Karptener for IRSA."
-    role_policies        = {}
-
-    policy_name            = "${module.eks.cluster_name}-karpenter"
-    policy_name_use_prefix = false
-    policy_description     = "TF: Policy used by Karpenter role."
-  }
-  karpenter_node = {
-    create_iam_role              = true
-    iam_role_name                = "${module.eks.cluster_name}-karpenter-node"
-    iam_role_use_name_prefix     = false
-    iam_role_description         = "TF: IAM role used by Karpenter managed nodes."
-    iam_role_additional_policies = {
-      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  fargate_profiles = {
+    karpenter = {
+      iam_role_name            = "${var.name}-fargate-karpenter"
+      iam_role_use_name_prefix = false
+      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
+      selectors                = [
+        { namespace = "karpenter" }
+      ]
+    }
+    kube-system = {
+      iam_role_name            = "${var.name}-fargate-kube-system"
+      iam_role_use_name_prefix = false
+      iam_role_description     = "TF: IAM role used by Fargate for kube-system profile."
+      selectors                = [
+        {
+          namespace = "kube-system"
+          labels    = {
+            "eks.amazonaws.com/component" = "coredns"
+            "k8s-app"                     = "kube-dns"
+          }
+        }
+      ]
     }
   }
+}
 
-  enable_argocd = true
-  argocd        = {
-    values = [file("${path.module}/extras/argocd-values.yaml")]
-  }
+module "karpenter" {
+  source = "./modules/karpenter"
 
-  enable_external_secrets = true
-  external_secrets        = {
-    namespace            = "external-secrets"
-    service_account_name = "external-secrets"
+  aws_region = var.aws_region
 
-    create_role          = true
-    role_name            = "${module.eks.cluster_name}-external-secrets"
-    role_name_use_prefix = false
-    role_description     = "TF: IAM role used by External Secrets for IRSA."
+  cluster_name                       = module.eks.cluster_name
+  cluster_version                    = module.eks.cluster_version
+  cluster_endpoint                   = module.eks.cluster_endpoint
+  cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
+  cluster_oidc_provider              = module.eks.oidc_provider
+  cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
+}
 
-    policy_name             = "no-op"
-    policy_name_use_prefix  = false
-    policy_description      = "TF: IAM policy for External Secrets in the ${module.eks.cluster_name} cluster."
-    source_policy_documents = [data.aws_iam_policy_document.no_op.json]
-  }
-  external_secrets_ssm_parameter_arns   = []
-  external_secrets_secrets_manager_arns = []
-  external_secrets_kms_key_arns         = []
+module "external_secrets" {
+  source = "./modules/external-secrets"
+
+  aws_region = var.aws_region
+
+  cluster_name                       = module.eks.cluster_name
+  cluster_version                    = module.eks.cluster_version
+  cluster_endpoint                   = module.eks.cluster_endpoint
+  cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
+  cluster_oidc_provider              = module.eks.oidc_provider
+  cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
+}
+
+resource "time_sleep" "wait_for_external_secrets" {
+  create_duration = "60s"
 
   depends_on = [
-    module.eks.fargate_profiles
+    module.karpenter,
   ]
 }
 
-data "aws_iam_policy_document" "no_op" {
-  statement {
-    effect    = "Allow"
-    actions   = ["none:null"]
-    resources = ["*"]
-  }
-}
+module "argocd" {
+  source = "./modules/argocd"
 
-resource "aws_iam_role" "argocd" {
-  name               = "${module.eks.cluster_name}-argocd"
-  description        = "TF: IAM role assumed by External Secrets to get the secrets of Argocd."
-  assume_role_policy = data.aws_iam_policy_document.argocd_assume.json
+  aws_region = var.aws_region
 
-  inline_policy {
-    name   = "read-secrets-manager"
-    policy = data.aws_iam_policy_document.argocd_secrets_manager.json
-  }
-}
+  cluster_name                       = module.eks.cluster_name
+  cluster_version                    = module.eks.cluster_version
+  cluster_endpoint                   = module.eks.cluster_endpoint
+  cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
+  cluster_oidc_provider              = module.eks.oidc_provider
+  cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
 
-data "aws_iam_policy_document" "argocd_assume" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "AWS"
-      identifiers = [module.eks_blueprints_addons.external_secrets.iam_role_arn]
-    }
-  }
-}
+  external_secrets_iam_role_arn = module.external_secrets.iam_role_arn
 
-data "aws_iam_policy_document" "argocd_secrets_manager" {
-  statement {
-    effect  = "Allow"
-    actions = [
-      "secretsmanager:GetSecretValue"
-    ]
-    resources = [
-      "arn:aws:secretsmanager:eu-west-1:${data.aws_caller_identity.this.account_id}:secret:${module.eks.cluster_name}/argocd/*"
-    ]
-  }
-}
-
-resource "kubectl_manifest" "this" {
-  for_each = toset(fileset("${path.module}/extras/manifests", "**/*"))
-
-  yaml_body = templatefile("${path.module}/extras/manifests/${each.value}", {
-    awsAccountId = data.aws_caller_identity.this.account_id
-    clusterName  = module.eks.cluster_name
-    defaultTags  = data.aws_default_tags.this.tags
-  })
-
-  depends_on = [module.eks_blueprints_addons]
+  depends_on = [
+    time_sleep.wait_for_external_secrets
+  ]
 }
