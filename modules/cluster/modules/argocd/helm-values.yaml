@@ -131,8 +131,9 @@ argo-cd:
     ssh:
       # -- Additional known hosts for private repositories
       extraHosts: |-
-        github.hootops.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCkUhoFH0l6E1wPYFqgRrARuUattbrNpAdlW06TE13RLKAKivwZfk47ylYZ8oWGzIZ0jKTH/QVjzXbYnyEyNZn8vOz6DPT3aV2tpMPzYqEm4mQErwsNAbPczP3JCIswAgC6VEE//SskRJqwTq/tOyrhZqSHGPsODuv/UANJsj1f4gi8+cllRWmumMqE3O4hlQ/03XmcP0rVcY1gbqXWtV/zqjobXjpVANFcfxe5aMvjb5hov6a29ler+kgSF9ovMaxhjwiTf+ZZ6/xCXWLH7ChCMkv4F0bX58W9VoHQ4TwZj36MJg8PTpJ8N40kV43nvPBZArFJuHDwM1ClRCKwKEJ
-        github.hootops.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLXzo6uKk9C5hDjPjsF/jWD01JywxkpJoQmMuGNorWM0JM1SbDfBKgfIp2kcWkYjyMnQQy5+Zj9W+eUVBt+Ahi8=
+        github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+        github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+        github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
 
     # ConfigMap for Config Management Plugins
     # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/

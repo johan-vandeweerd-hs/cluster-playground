@@ -7,6 +7,7 @@
 ## Cluster
 
 ```sh
+export TF_VAR_git_url="git@github.com:<USERNAME_OR_ORGANISATION>/<REPOSITORY_NAME>"
 export TF_VAR_contributor="<YOUR_NAME_ALL_LOWERCASE>"
 export TF_VAR_aws_region="<SOME_AWS_REGION>"
 hootctl sync iam-role user-sandbox-admin -d
@@ -34,4 +35,14 @@ Get the password from the`argocd-initial-admin-secret`
 
 ```
 kubectl get secret -n argocd argocd-initial-admin-secret -ojson | jq -r '.data.password' | base64 -d 
+```
+
+## Git SSH key (optional)
+
+If you want Argocd to use a private Github repostiories, you need to add the necessary SSH keys to Secrets Manager.
+
+```
+vi github-ssh-key
+aws secretsmanager create-secret --name "cluster-playground-${TF_VAR_contributor}/argocd/secrets" --description "Secrets used by Argocd" --secret-string "{\"sshPrivateKey\":\"$(cat github-ssh-key | sed 's/$/\\\\n/' | tr -d '\n')\"}"
+rm github-ssh-key
 ```

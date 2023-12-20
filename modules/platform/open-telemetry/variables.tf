@@ -1,5 +1,10 @@
-variable "revision" {
-  description = "The Git revision to use for Argocd applications"
+variable "git_url" {
+  description = "The Git URL used in the Argocd application manifest"
+  type        = string
+}
+
+variable "git_revision" {
+  description = "The Git revision used in the Argocd application manifest"
   type        = string
 }
 

@@ -6,7 +6,8 @@ resource "kubectl_manifest" "application" {
   yaml_body = templatefile("${path.module}/chart/application.yaml", {
     name           = local.moduleName
     namespace      = local.moduleName
-    revision       = var.revision
+    gitUrl         = var.git_url
+    revision       = var.git_revision
     helmParameters = {
       roleArn = aws_iam_role.open_telemetry.arn
     }

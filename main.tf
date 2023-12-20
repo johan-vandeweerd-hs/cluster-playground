@@ -34,7 +34,8 @@ module "cluster" {
 module "open_telemetry" {
   source = "./modules/platform/open-telemetry"
 
-  revision = var.contributor
+  git_url      = var.git_url
+  git_revision = var.contributor
 
   cluster_name                       = module.cluster.cluster_name
   cluster_endpoint                   = module.cluster.cluster_endpoint
