@@ -96,8 +96,6 @@ module "eks" {
 module "karpenter" {
   source = "./modules/karpenter"
 
-  aws_region = var.aws_region
-
   cluster_name                       = module.eks.cluster_name
   cluster_version                    = module.eks.cluster_version
   cluster_endpoint                   = module.eks.cluster_endpoint
@@ -108,8 +106,6 @@ module "karpenter" {
 
 module "external_secrets" {
   source = "./modules/external-secrets"
-
-  aws_region = var.aws_region
 
   cluster_name                       = module.eks.cluster_name
   cluster_version                    = module.eks.cluster_version
@@ -129,8 +125,6 @@ resource "time_sleep" "wait_for_external_secrets" {
 
 module "argocd" {
   source = "./modules/argocd"
-
-  aws_region = var.aws_region
 
   cluster_name                       = module.eks.cluster_name
   cluster_version                    = module.eks.cluster_version

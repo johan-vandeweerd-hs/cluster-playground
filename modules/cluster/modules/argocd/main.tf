@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "argocd_secrets_manager" {
       "secretsmanager:GetSecretValue"
     ]
     resources = [
-      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.this.account_id}:secret:${var.cluster_name}/argocd/*"
+      "arn:aws:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.this.account_id}:secret:${var.cluster_name}/argocd/*"
     ]
   }
 }
@@ -57,7 +57,7 @@ resource "kubectl_manifest" "this" {
 
   yaml_body = templatefile("${path.module}/manifests/${each.value}", {
     awsAccountId = data.aws_caller_identity.this.account_id
-    awsRegion    = var.aws_region
+    awsRegion    = data.aws_region.this.name
     clusterName  = var.cluster_name
   })
 

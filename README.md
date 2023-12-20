@@ -7,9 +7,9 @@
 ## Cluster
 
 ```sh
+export AWS_REGION="<SOME_AWS_REGION>"
 export TF_VAR_git_url="git@github.com:<USERNAME_OR_ORGANISATION>/<REPOSITORY_NAME>"
 export TF_VAR_contributor="<YOUR_NAME_ALL_LOWERCASE>"
-export TF_VAR_aws_region="<SOME_AWS_REGION>"
 hootctl sync iam-role user-sandbox-admin -d
 terraform init
 terraform apply
