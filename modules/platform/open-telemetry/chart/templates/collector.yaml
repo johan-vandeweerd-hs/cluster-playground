@@ -20,17 +20,24 @@ spec:
   serviceAccount: open-telemetry
   config: |
     receivers:
-      otlp:
-        protocols:
-          http:
+      awscloudwatch:
+        region: {{ .Values.awsRegion }}
+        logs:
+          poll_interval: 1m
+          groups:
+            named:
+              /aws/eks/{{ .Values.clusterName }}/cluster:
+                prefixes:
+                  - authenticator
+                  - kube-apiserver
     processors:
     exporters:
       debug:
     service:
       pipelines:
-        traces:
+        logs:
           receivers:
-            - otlp
+            - awscloudwatch
           processors: []
           exporters:
             - debug
