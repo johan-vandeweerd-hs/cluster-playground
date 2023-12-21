@@ -39,3 +39,16 @@ module "open_telemetry" {
   cluster_oidc_provider              = module.cluster.cluster_oidc_provider
   cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
 }
+
+module "overprovisioning" {
+  source = "./modules/platform/overprovisioner"
+
+  git_url      = var.git_url
+  git_revision = var.contributor
+
+  cluster_name                       = module.cluster.cluster_name
+  cluster_endpoint                   = module.cluster.cluster_endpoint
+  cluster_certificate_authority_data = module.cluster.cluster_certificate_authority_data
+  cluster_oidc_provider              = module.cluster.cluster_oidc_provider
+  cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
+}
