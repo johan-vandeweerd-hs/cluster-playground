@@ -53,6 +53,7 @@ data "aws_iam_policy_document" "cloudwatch_read_only" {
     actions = [
       "logs:DescribeLogGroups",
       "logs:DescribeLogStreams",
+      "logs:FilterLogEvents",
       "logs:GetLogEvents",
       "logs:GetLogGroupFields",
       "logs:GetLogRecord",
