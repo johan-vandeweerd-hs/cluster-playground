@@ -4,15 +4,14 @@ metadata:
   name: default
 spec:
   amiFamily: Bottlerocket
-  role: "${clusterName}-karpenter-node"
+  role: ${clusterName}-karpenter-node
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "${clusterName}"
+        Name: ${clusterName}-private-*
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "${clusterName}"
+        Name: eks-cluster-sg-${clusterName}-*
   tags:
-    karpenter.sh/discovery: "${clusterName}"
 %{ for key, value in defaultTags }
     ${key}: ${value}
 %{ endfor }

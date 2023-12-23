@@ -12,12 +12,8 @@ module "eks" {
 
   cloudwatch_log_group_retention_in_days = 7
 
-  create_cluster_primary_security_group_tags = true
   create_cluster_security_group              = false
   create_node_security_group                 = false
-  cluster_tags                               = {
-    "karpenter.sh/discovery" = var.name
-  }
 
   iam_role_name            = "${var.name}-cluster"
   iam_role_use_name_prefix = false
