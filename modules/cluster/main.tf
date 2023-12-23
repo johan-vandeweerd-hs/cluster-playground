@@ -1,3 +1,4 @@
+# EKS
 module "eks" {
   source = "terraform-aws-modules/eks/aws"
 
@@ -35,34 +36,6 @@ module "eks" {
     }
   ]
 
-  cluster_addons = {
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-    eks-pod-identity-agent = {
-      most_recent = true
-    }
-    coredns = {
-      most_recent          = true
-      configuration_values = jsonencode({
-        computeType = "Fargate"
-        resources   = {
-          requests = {
-            cpu    = "0.25"
-            memory = "256M"
-          }
-          limits = {
-            cpu    = "0.25"
-            memory = "256M"
-          }
-        }
-      })
-    }
-  }
-
   fargate_profiles = {
     karpenter = {
       iam_role_name            = "${var.cluster_name}-fargate-karpenter"
@@ -72,23 +45,14 @@ module "eks" {
         { namespace = "karpenter" }
       ]
     }
-    kube-system = {
-      iam_role_name            = "${var.cluster_name}-fargate-kube-system"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for kube-system profile."
-      selectors                = [
-        {
-          namespace = "kube-system"
-          labels    = {
-            "eks.amazonaws.com/component" = "coredns"
-            "k8s-app"                     = "kube-dns"
-          }
-        }
-      ]
-    }
   }
 }
 
+# Karpenter
+#
+# We wait for the EKS cluster to be up and the Karpenter fargate profile to be
+# created. If we don't, the Karpenter node-class and node-pool can't be created
+# because the adminssion controller of Karpenter is not available yet.
 module "karpenter" {
   source = "aws-ia/eks-blueprints-addons/aws"
 
@@ -130,6 +94,7 @@ resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
 }
 
+# Wait for Karpenter to be up and the admission controller to be ready
 resource "time_sleep" "wait_for_karpenter" {
   create_duration  = "60s"
   destroy_duration = "30s"
@@ -152,7 +117,11 @@ resource "kubectl_manifest" "karpenter" {
   ]
 }
 
-module "argocd" {
+# EKS Addons and ArgoCD
+#
+# We wait for the NodePool and NodeClass to be created so Karpenter can spin up
+# new EC2 nodes for Coredns and Argocd.
+module "blueprint_addons" {
   source = "aws-ia/eks-blueprints-addons/aws"
 
   cluster_name      = module.eks.cluster_name
@@ -160,10 +129,30 @@ module "argocd" {
   cluster_endpoint  = module.eks.cluster_endpoint
   oidc_provider_arn = module.eks.oidc_provider_arn
 
+  eks_addons = {
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    eks-pod-identity-agent = {
+      most_recent = true
+    }
+    coredns = {
+      most_recent          = true
+      configuration_values = jsonencode(yamldecode(file("${path.module}/manifests/coredns-values.yaml")))
+    }
+  }
+
   enable_argocd = true
   argocd        = {
-    values = [file("${path.module}/manifests/argocd-helm-values.yaml")]
+    values = [file("${path.module}/manifests/helm-values.yaml")]
   }
+
+  depends_on = [
+    kubectl_manifest.karpenter
+  ]
 }
 
 resource "kubectl_manifest" "argocd" {
@@ -173,6 +162,6 @@ resource "kubectl_manifest" "argocd" {
   })
 
   depends_on = [
-    module.argocd
+    module.blueprint_addons
   ]
 }
