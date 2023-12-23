@@ -100,25 +100,6 @@ module "karpenter" {
   cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
 }
 
-module "external_secrets" {
-  source = "./modules/external-secrets"
-
-  cluster_name                       = module.eks.cluster_name
-  cluster_version                    = module.eks.cluster_version
-  cluster_endpoint                   = module.eks.cluster_endpoint
-  cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
-  cluster_oidc_provider              = module.eks.oidc_provider
-  cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
-}
-
-resource "time_sleep" "wait_for_external_secrets" {
-  create_duration = "60s"
-
-  depends_on = [
-    module.karpenter,
-  ]
-}
-
 module "argocd" {
   source = "./modules/argocd"
 
@@ -128,10 +109,4 @@ module "argocd" {
   cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
   cluster_oidc_provider              = module.eks.oidc_provider
   cluster_oidc_provider_arn          = module.eks.oidc_provider_arn
-
-  external_secrets_iam_role_arn = module.external_secrets.iam_role_arn
-
-  depends_on = [
-    time_sleep.wait_for_external_secrets
-  ]
 }
