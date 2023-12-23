@@ -27,21 +27,8 @@ module "cluster" {
   public_subnet_ids  = module.network.public_subnet_ids
 }
 
-module "open_telemetry" {
-  source = "./modules/platform/open-telemetry"
-
-  git_url      = var.git_url
-  git_revision = var.contributor
-
-  cluster_name                       = module.cluster.cluster_name
-  cluster_endpoint                   = module.cluster.cluster_endpoint
-  cluster_certificate_authority_data = module.cluster.cluster_certificate_authority_data
-  cluster_oidc_provider              = module.cluster.cluster_oidc_provider
-  cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
-}
-
-module "overprovisioning" {
-  source = "./modules/platform/overprovisioner"
+module "platform" {
+  source = "./modules/platform"
 
   git_url      = var.git_url
   git_revision = var.contributor
