@@ -10,21 +10,15 @@ spec:
       requirements:
         - key: karpenter.sh/capacity-type
           operator: In
-          values: ["spot", "on-demand"]
+          values: [spot, on-demand]
         - key: kubernetes.io/arch
           operator: In
-          values: ["amd64"]
-        - key: kubernetes.io/os
-          operator: In
-          values:
-            - linux
-        - key: karpenter.k8s.aws/instance-family
-          operator: In
-          values:
-            - t3a
-            - t4g
+          values: [arm64]
+        - key: karpenter.k8s.aws/instance-memory
+          operator: Gt
+          values: ["2048"]
   disruption:
     consolidationPolicy: WhenUnderutilized
     expireAfter: 48h
   limits:
-    cpu: '25'
+    cpu: "25"
