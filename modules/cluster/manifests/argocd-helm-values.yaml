@@ -21,7 +21,7 @@ argo-cd:
       repository: quay.io/argoproj/argocd
 
     # -- Secrets with credentials to pull images from a private registry
-    imagePullSecrets: []
+    imagePullSecrets: [ ]
 
     # Default logging options used by all components
     logging:
@@ -284,7 +284,7 @@ argo-cd:
         configMap:
           name: argocd-cmp-cm
       - name: cmp-tmp
-        emptyDir: {}
+        emptyDir: { }
 
     ## Enable Custom Rules for the Repo server's Cluster Role resource
     ## Enable this and set the rules: to whatever custom rules you want for the Cluster Role resource.
@@ -293,7 +293,7 @@ argo-cd:
       # -- Enable custom rules for the Repo server's Cluster Role resource
       enabled: true
       # -- List of custom rules for the Repo server's Cluster Role resource
-      rules: []
+      rules: [ ]
 
     ## Repo server service account
     ## If create is set to true, make sure to uncomment the name and update the rbac section below
@@ -302,7 +302,7 @@ argo-cd:
       create: true
 
     # -- Repo server rbac rules
-    rbac: []
+    rbac: [ ]
 
   ## ApplicationSet controller
   applicationSet:

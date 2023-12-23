@@ -31,7 +31,7 @@ kubectl port-forward -n argocd service/argo-cd-argocd-server 8000:443
 ```
 
 Browse to [https://localhost:8000](https://localhost:8000) and login with username `admin`.  
-Get the password from the`argocd-initial-admin-secret` 
+Get the password from the`argocd-initial-admin-secret`
 
 ```
 kubectl get secret -n argocd argocd-initial-admin-secret -ojson | jq -r '.data.password' | base64 -d 

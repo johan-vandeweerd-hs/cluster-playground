@@ -19,9 +19,9 @@ module "network" {
 module "cluster" {
   source = "./modules/cluster"
 
+  cluster_name    = local.name
   cluster_version = "1.28"
 
-  name               = local.name
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
   public_subnet_ids  = module.network.public_subnet_ids
