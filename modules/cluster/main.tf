@@ -105,9 +105,9 @@ resource "time_sleep" "wait_for_karpenter" {
 }
 
 resource "kubectl_manifest" "karpenter" {
-  for_each = toset(fileset("${path.module}/manifests/karpenter", "*.yaml"))
+  for_each = toset(fileset("${path.module}/karpenter/manifests", "*.yaml"))
 
-  yaml_body = templatefile("${path.module}/manifests/karpenter/${each.value}", {
+  yaml_body = templatefile("${path.module}/karpenter/manifests/${each.value}", {
     clusterName = var.cluster_name
     defaultTags = data.aws_default_tags.this.tags
   })
@@ -141,13 +141,13 @@ module "blueprint_addons" {
     }
     coredns = {
       most_recent          = true
-      configuration_values = jsonencode(yamldecode(file("${path.module}/manifests/coredns-values.yaml")))
+      configuration_values = jsonencode(yamldecode(file("${path.module}/coredns/configuration.yaml")))
     }
   }
 
   enable_argocd = true
   argocd        = {
-    values = [file("${path.module}/manifests/helm-values.yaml")]
+    values = [file("${path.module}/argocd/helm-values.yaml")]
   }
 
   depends_on = [
@@ -156,9 +156,9 @@ module "blueprint_addons" {
 }
 
 resource "kubectl_manifest" "argocd" {
-  for_each = toset(fileset("${path.module}/manifests/argocd", "*.yaml"))
+  for_each = toset(fileset("${path.module}/argocd/manifests", "*.yaml"))
 
-  yaml_body = templatefile("${path.module}/manifests/argocd/${each.value}", {
+  yaml_body = templatefile("${path.module}/argocd/manifests/${each.value}", {
   })
 
   depends_on = [
