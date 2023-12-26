@@ -1,0 +1,35 @@
+ingress-nginx:
+  revisionHistoryLimit: 0
+
+  controller:
+    topologySpreadConstraints:
+     - topologyKey: topology.kubernetes.io/zone
+       maxSkew: 1
+       whenUnsatisfiable: ScheduleAnyway
+       labelSelector:
+         matchLabels:
+           app.kubernetes.io/name: '{{ include "ingress-nginx.name" . }}'
+           app.kubernetes.io/instance: '{{ .Release.Name }}'
+           app.kubernetes.io/component: controller
+     - topologyKey: kubernetes.io/hostname
+       maxSkew: 1
+       whenUnsatisfiable: ScheduleAnyway
+       labelSelector:
+         matchLabels:
+           app.kubernetes.io/name: '{{ include "ingress-nginx.name" . }}'
+           app.kubernetes.io/instance: '{{ .Release.Name }}'
+           app.kubernetes.io/component: controller
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 75
+      targetMemoryUtilizationPercentage: 75
+    metrics:
+      enabled: true
