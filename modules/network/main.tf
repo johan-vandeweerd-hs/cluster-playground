@@ -7,8 +7,15 @@ module "vpc" {
 
   cidr = var.vpc_cidr
 
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
+  private_subnets     = var.private_subnets
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = ""
+  }
+
+  public_subnets     = var.public_subnets
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = ""
+  }
 
   create_database_subnet_group  = false
   manage_default_network_acl    = false

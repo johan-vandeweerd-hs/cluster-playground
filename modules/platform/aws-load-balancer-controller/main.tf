@@ -11,6 +11,7 @@ resource "kubectl_manifest" "application" {
     helmParameters = {
       "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
       "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
+      "aws-load-balancer-controller.vpcId"                                                         = data.aws_vpc.this.id
     }
   })
 }
@@ -27,6 +28,10 @@ module "iam_role" {
       provider_arn               = var.cluster_oidc_provider_arn
       namespace_service_accounts = ["aws-load-balancer-controller:aws-load-balancer-controller"]
     }
+  }
+
+  role_policy_arns = {
+    "aws-load-balancer-controller" = aws_iam_policy.this.arn
   }
 }
 
