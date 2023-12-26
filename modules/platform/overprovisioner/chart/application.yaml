@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: default
   source:
     repoURL: ${gitUrl}
     path: modules/platform/${name}/chart
@@ -18,7 +19,6 @@ spec:
         - name: "${key}"
           value: "${value}"
 %{ endfor ~}
-  project: default
   destination:
     namespace: ${namespace}
     server: https://kubernetes.default.svc
