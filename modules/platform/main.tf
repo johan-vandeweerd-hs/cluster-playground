@@ -1,5 +1,5 @@
-module "secrets_manager" {
-  source = "./secrets-manager"
+module "external_secrets" {
+  source = "./external-secrets"
 
   git_url      = var.git_url
   git_revision = var.git_revision

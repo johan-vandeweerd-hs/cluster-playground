@@ -11,7 +11,7 @@ resource "kubectl_manifest" "application" {
     helmParameters = {
       awsRegion   = data.aws_region.this.name
       clusterName = var.cluster_name
-      "external-secrets.serviceAccount.annotations.'eks.amazonaws.com/role-arn'" = module.iam_role.iam_role_arn
+      "external-secrets.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
     }
   })
 }
