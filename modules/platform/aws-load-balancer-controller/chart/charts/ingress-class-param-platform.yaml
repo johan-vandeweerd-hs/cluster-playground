@@ -1,0 +1,6 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: IngressClassParams
+metadata:
+  name: platform
+spec:
+  scheme: internet-facing
