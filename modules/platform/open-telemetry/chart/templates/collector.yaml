@@ -30,16 +30,6 @@ spec:
                 prefixes:
                   - authenticator
                   - kube-apiserver
-      awscloudwatchmetrics:
-        region: {{ .Values.awsRegion }}
-        poll_interval: 10m
-        metrics:
-          named:
-            - namespace: "AWS/Usage"
-              metric_name: "ResourceCount"
-              dimensions:
-                - Name: "Service"
-                  Value: "Fargate"
       prometheus:
         config:
           scrape_configs:
