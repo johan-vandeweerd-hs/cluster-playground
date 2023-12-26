@@ -22,3 +22,8 @@ variable "public_subnet_ids" {
   description = "The list of IDs of the public subnets to use."
   type        = list(string)
 }
+
+variable "git_url" {
+  description = "The Git URL used in the Argpcd application manifests."
+  type        = string
+}

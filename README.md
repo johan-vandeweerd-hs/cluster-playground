@@ -42,7 +42,7 @@ kubectl get secret -n argocd argocd-initial-admin-secret -ojson | jq -r '.data.p
 If you want Argocd to use a private Github repostiories, you need to add the necessary SSH keys to Secrets Manager.
 
 ```
-vi github-ssh-key
-aws secretsmanager create-secret --name "cluster-playground-${TF_VAR_contributor}/argocd/secrets" --description "Secrets used by Argocd" --secret-string "{\"sshPrivateKey\":\"$(cat github-ssh-key | sed 's/$/\\\\n/' | tr -d '\n')\"}"
-rm github-ssh-key
+vi ssh-key-github-com
+aws secretsmanager create-secret --name "cluster-playground-${TF_VAR_contributor}/argocd/ssh-key-github-com" --description "Secrets used by Argocd" --secret-string "$(cat ssh-key-github-com)"
+rm ssh-key-github-com
 ```
