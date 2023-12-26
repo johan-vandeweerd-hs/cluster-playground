@@ -5,8 +5,6 @@ aws-load-balancer-controller:
 #  fullnameOverride: ""
 
   serviceAccount:
-    annotations:
-      eks.amazonaws.com/role-arn: {{ .Values.roleArn }}
     name: aws-load-balancer-controller
 
   resources:
@@ -20,8 +18,6 @@ aws-load-balancer-controller:
 
 #  # Enable cert-manager
 #  enableCertManager: false
-
-  clusterName: {{ .Values.clusterName }}
 
 #  # cluster contains configurations specific to the kubernetes cluster
 #  cluster:

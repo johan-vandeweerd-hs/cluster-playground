@@ -9,9 +9,8 @@ resource "kubectl_manifest" "application" {
     gitUrl         = var.git_url
     revision       = var.git_revision
     helmParameters = {
-      awsRegion   = data.aws_region.this.name
-      clusterName = var.cluster_name
-      roleArn     = module.iam_role.iam_role_arn
+      "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
+      "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
     }
   })
 }
