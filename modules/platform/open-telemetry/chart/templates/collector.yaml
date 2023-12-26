@@ -39,15 +39,15 @@ spec:
                 - targets:
                     - karpenter.karpenter:8000
                     - open-telemetry-operator.open-telemetry:8080
+    processors:
+    exporters:
+      debug:
       sumologic:
         endpoint: https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV0SIKuP9XjQELiZtQMCeKi2IWR-sYkCYOEV6wjNta1Zy4BhJ-qG-hAbSqxoSqhrTUTb2l_AZbEm3USdwkDK0pViKVbfzD3Ju2-85y1HpQzcXw==
         max_request_body_size: "1_048_576"  # 1MB
         log_format: "text"
         metadata_attributes:
           - k8s.*
-    processors:
-    exporters:
-      debug:
     service:
       pipelines:
         metrics:
