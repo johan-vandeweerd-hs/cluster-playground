@@ -1,0 +1,36 @@
+aws-load-balancer-controller:
+  replicaCount: 2
+
+#  nameOverride: ""
+#  fullnameOverride: ""
+
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: {{ .Values.roleArn }}
+    name: aws-load-balancer-controller
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 128Mi
+
+  topologySpreadConstraints:
+
+#  # Enable cert-manager
+#  enableCertManager: false
+
+  clusterName: {{ .Values.clusterName }}
+
+#  # cluster contains configurations specific to the kubernetes cluster
+#  cluster:
+#    # Cluster DNS domain (required for requesting TLS certificates)
+#    dnsDomain: cluster.local
+
+  # The ingress class this controller will satisfy. If not specified, controller will match all
+  # ingresses without ingress class annotation and ingresses of type alb
+  ingressClass: alb
+
+  # disableIngressClassAnnotation disables the usage of kubernetes.io/ingress.class annotation, false by default
+  disableIngressClassAnnotation: true
