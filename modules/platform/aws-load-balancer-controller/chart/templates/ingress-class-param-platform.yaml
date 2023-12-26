@@ -4,3 +4,8 @@ metadata:
   name: platform
 spec:
   scheme: internet-facing
+  tags:
+{{- range $key, $value := .Values.tags }}
+    - key: {{ $key }}
+      value: {{ $value }}
+{{- end }}

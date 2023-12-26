@@ -10,3 +10,6 @@ data "aws_vpc" "this" {
     values = [var.cluster_name]
   }
 }
+
+data "aws_default_tags" "this" {
+}
