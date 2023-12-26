@@ -71,4 +71,5 @@ spec:
             - awscloudwatch
           processors: []
           exporters:
-            - sumologic
+            - debug
+#             - sumologic
