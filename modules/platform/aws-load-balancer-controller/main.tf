@@ -217,7 +217,7 @@ data "aws_iam_policy_document" "this" {
     ]
     condition {
       test     = "Null"
-      variable = "Tag/elbv2.k8s.aws/cluster"
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
       values   = ["true"]
     }
     condition {
@@ -254,7 +254,7 @@ data "aws_iam_policy_document" "this" {
     resources = ["*"]
     condition {
       test     = "Null"
-      variable = "Tag/elbv2.k8s.aws/cluster"
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
       values   = ["false"]
     }
   }
