@@ -8,7 +8,9 @@ resource "kubectl_manifest" "application" {
     namespace      = local.module_name
     gitUrl         = var.git_url
     revision       = var.git_revision
-    helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value}, {
+    helmParameters = merge({for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value}, {
+      clusterName                                                                                  = var.cluster_name
+      certificateArn                                                                               = module.acm.acm_certificate_arn
       "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
       "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
       "aws-load-balancer-controller.vpcId"                                                         = data.aws_vpc.this.id
