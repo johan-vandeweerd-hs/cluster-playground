@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: platform
   rules:
-    - host: argocd.hackathon.io
+    - host: argocd.{{ .Values.clusterName }}.hackathon.hootops.com
       http:
         paths:
           - backend:

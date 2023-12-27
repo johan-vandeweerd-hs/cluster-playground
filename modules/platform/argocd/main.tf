@@ -9,6 +9,7 @@ resource "kubectl_manifest" "application" {
     gitUrl         = var.git_url
     revision       = var.git_revision
     helmParameters = {
+      clusterName = var.cluster_name
     }
   })
 }
