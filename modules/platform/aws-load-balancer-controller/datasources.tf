@@ -13,3 +13,7 @@ data "aws_vpc" "this" {
 
 data "aws_default_tags" "this" {
 }
+
+data "aws_route53_zone" "hackathon" {
+  name = "hackathon.hootops.com"
+}

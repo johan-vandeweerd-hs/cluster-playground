@@ -35,6 +35,7 @@ module "iam_role" {
   }
 }
 
+# IAM
 resource "aws_iam_policy" "this" {
   name        = "aws-load-balancer-controller"
   description = "TF: IAM policy to allow read access for secrets of Argocd"
@@ -300,4 +301,34 @@ data "aws_iam_policy_document" "this" {
     ]
     resources = ["*"]
   }
+}
+
+# DNS
+resource "aws_route53_zone" "cluster_hackathon_hootops_com" {
+  name    = "${var.cluster_name}.hackathon.hootops.com"
+  comment = "TF: Subdomain for ${var.cluster_name} of hackathon.hootops.com."
+}
+
+resource "aws_route53_record" "hackathon_hootops" {
+  zone_id = data.aws_route53_zone.hackathon.zone_id
+  name    = var.cluster_name
+  type    = "NS"
+  ttl     = 300
+  records = aws_route53_zone.cluster_hackathon_hootops_com.name_servers
+}
+
+# Certificate
+module "acm" {
+  source = "terraform-aws-modules/acm/aws"
+
+  domain_name = "${var.cluster_name}.hackathon.hootops.com"
+  zone_id     = aws_route53_zone.cluster_hackathon_hootops_com.zone_id
+
+  validation_method = "DNS"
+
+  subject_alternative_names = [
+    "*.${var.cluster_name}.hackathon.hootops.com"
+  ]
+
+  wait_for_validation = true
 }
