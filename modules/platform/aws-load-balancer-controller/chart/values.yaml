@@ -1,9 +1,6 @@
 aws-load-balancer-controller:
   replicaCount: 2
 
-#  nameOverride: ""
-#  fullnameOverride: ""
-
   serviceAccount:
     name: aws-load-balancer-controller
 
@@ -15,18 +12,23 @@ aws-load-balancer-controller:
       memory: 128Mi
 
   topologySpreadConstraints:
+    - topologyKey: "topology.kubernetes.io/zone"
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: aws-load-balancer-controller
+          app.kubernetes.io/instance: aws-load-balancer-controller
+    - topologyKey: "kubernetes.io/hostname"
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: aws-load-balancer-controller
+          app.kubernetes.io/instance: aws-load-balancer-controller
 
-#  # Enable cert-manager
-#  enableCertManager: false
+  createIngressClassResource: false
+  ingressClassParams:
+    create: false
 
-#  # cluster contains configurations specific to the kubernetes cluster
-#  cluster:
-#    # Cluster DNS domain (required for requesting TLS certificates)
-#    dnsDomain: cluster.local
-
-  # The ingress class this controller will satisfy. If not specified, controller will match all
-  # ingresses without ingress class annotation and ingresses of type alb
-  ingressClass: alb
-
-  # disableIngressClassAnnotation disables the usage of kubernetes.io/ingress.class annotation, false by default
   disableIngressClassAnnotation: true
