@@ -14,6 +14,7 @@ resource "kubectl_manifest" "application" {
       "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
       "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
       "aws-load-balancer-controller.vpcId"                                                         = data.aws_vpc.this.id
+      "aws-load-balancer-controller.backendSecurityGroup"                                          = data.aws_security_group.this.id
     })
   })
 }
