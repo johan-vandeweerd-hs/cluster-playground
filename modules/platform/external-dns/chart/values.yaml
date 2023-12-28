@@ -25,6 +25,6 @@ external-dns:
           app.kubernetes.io/instance: external-dns
 
   serviceMonitor:
-    enabled: true
+    enabled: false
 
   logFormat: json
