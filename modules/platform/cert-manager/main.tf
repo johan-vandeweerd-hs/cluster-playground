@@ -16,6 +16,7 @@ resource "kubectl_manifest" "application" {
   })
 }
 
+# IAM
 module "iam_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
@@ -36,7 +37,7 @@ module "iam_role" {
 }
 
 resource "aws_iam_policy" "route53" {
-  name        = "route53"
+  name        = "${var.cluster_name}-cert-mananger-route53"
   description = "TF: IAM policy to allow cert-manager to update Route53"
 
   policy = data.aws_iam_policy_document.route53.json

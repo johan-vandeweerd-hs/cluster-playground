@@ -19,6 +19,7 @@ resource "kubectl_manifest" "application" {
   })
 }
 
+# IAM
 module "iam_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
@@ -38,10 +39,9 @@ module "iam_role" {
   }
 }
 
-# IAM
 resource "aws_iam_policy" "this" {
-  name        = "aws-load-balancer-controller"
-  description = "TF: IAM policy to allow read access for secrets of Argocd"
+  name        = "${var.cluster_name}-aws-load-balancer-controller"
+  description = "TF: IAM policy with the necessary permissions for AWS Load Balancer controller."
 
   policy = data.aws_iam_policy_document.this.json
 }
