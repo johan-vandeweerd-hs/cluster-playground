@@ -14,8 +14,8 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-      parameters: %{ if length(helm_parameters) == 0 }[]%{endif}
-%{ for key, value in helm_parameters ~}
+      parameters: %{ if length(helmParameters) == 0 }[]%{endif}
+%{ for key, value in helmParameters ~}
         - name: "${key}"
           value: "${value}"
 %{ endfor ~}

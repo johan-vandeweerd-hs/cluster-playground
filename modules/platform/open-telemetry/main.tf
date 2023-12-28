@@ -8,7 +8,7 @@ resource "kubectl_manifest" "application" {
     namespace       = local.module_name
     gitUrl          = var.git_url
     revision        = var.git_revision
-    helm_parameters = {
+    helmParameters = {
       awsRegion   = data.aws_region.this.name
       clusterName = var.cluster_name
       roleArn     = aws_iam_role.open_telemetry.arn
