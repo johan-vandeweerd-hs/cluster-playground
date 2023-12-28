@@ -1,11 +1,3 @@
 opentelemetry-operator:
   nameOverride: "open-telemetry-operator"
   fullnameOverride: "open-telemetry-operator"
-
-  admissionWebhooks:
-    create: true
-    certManager:
-      enabled: false
-    autoGenerateCert:
-      enabled: true
-      recreate: false

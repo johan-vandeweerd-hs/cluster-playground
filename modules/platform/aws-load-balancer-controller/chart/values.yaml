@@ -1,6 +1,8 @@
 aws-load-balancer-controller:
   replicaCount: 2
 
+  enableCertManager: true
+
   serviceAccount:
     name: aws-load-balancer-controller
 
