@@ -46,3 +46,25 @@ vi ssh-key-github-com
 aws secretsmanager create-secret --name "cluster-playground-${TF_VAR_contributor}/argocd/ssh-key-github-com" --description "Secrets used by Argocd" --secret-string "$(cat ssh-key-github-com)"
 rm ssh-key-github-com
 ```
+
+# Teardown
+
+Use following command to clean up once you are done:
+
+```
+terraform apply -destroy
+```
+
+There is still some work to be done to do a clean teardown. Following resourceds are not cleaned up automatically or are
+blocking the destroy:
+
+- EC2 instances managed by Karpenter
+- Load balancers managed by AWS Load Balancer Controller
+- DNS records managed by External DNS
+
+You can use following AWS CLI command to get an idea of the resources that still exist.
+
+```
+export AWS_REGION="<SOME_AWS_REGION>"
+aws resource-groups search-resources  --resource-query "{\"Type\":\"TAG_FILTERS_1_0\",\"Query\":\"{\\\"ResourceTypeFilters\\\":[\\\"AWS::AllSupported\\\"],\\\"TagFilters\\\":[{\\\"Key\\\":\\\"Contributor\\\",\\\"Values\\\":[\\\"${TF_VAR_contributor}\\\"]}]}\"}"
+```
