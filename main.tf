@@ -40,4 +40,9 @@ module "platform" {
   cluster_certificate_authority_data = module.cluster.cluster_certificate_authority_data
   cluster_oidc_provider              = module.cluster.cluster_oidc_provider
   cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
+
+  depends_on = [
+    module.network,
+    module.cluster,
+  ]
 }
