@@ -23,6 +23,21 @@ module "eks" {
   cluster_encryption_policy_use_name_prefix = false
   cluster_encryption_policy_description     = "TF: IAM policy used by the ${var.cluster_name} cluster for encryption."
 
+  fargate_profiles = {
+    karpenter = {
+      iam_role_name            = "${var.cluster_name}-fargate-karpenter"
+      iam_role_use_name_prefix = false
+      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
+      selectors                = [
+        { namespace = "karpenter" }
+      ]
+    }
+  }
+}
+
+module "aws_auth" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+
   manage_aws_auth_configmap = true
   aws_auth_roles            = [
     {
@@ -34,15 +49,4 @@ module "eks" {
       ]
     }
   ]
-
-  fargate_profiles = {
-    karpenter = {
-      iam_role_name            = "${var.cluster_name}-fargate-karpenter"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
-      selectors                = [
-        { namespace = "karpenter" }
-      ]
-    }
-  }
 }
