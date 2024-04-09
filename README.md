@@ -8,18 +8,18 @@
 
 ```sh
 export AWS_REGION="<SOME_AWS_REGION>"
+export TF_VAR_project_name="<PROJECT_NAME>"
 export TF_VAR_git_url="git@github.com:<USERNAME_OR_ORGANISATION>/<REPOSITORY_NAME>"
-export TF_VAR_contributor="<YOUR_NAME_ALL_LOWERCASE>"
-hootctl sync iam-role user-sandbox-admin -d
 terraform init
-terraform apply
+terraform apply -target module.network
+terraform apply -target module.cluster
+terraform apply -target module.platform
 ```
 
 When the cluster is running, you need the following commands to update your kubeconfig.
 
 ```
-hootctl sync iam-role user-sandbox-admin -d
-aws eks update-kubeconfig --name cluster-playground-${TF_VAR_contributor}
+aws eks update-kubeconfig --name ${TF_VAR_project_name}
 ```
 
 ## Argocd
@@ -43,7 +43,7 @@ If you want Argocd to use a private Github repostiories, you need to add the nec
 
 ```
 vi ssh-key-github-com
-aws secretsmanager create-secret --name "cluster-playground-${TF_VAR_contributor}/argocd/ssh-key-github-com" --description "Secrets used by Argocd" --secret-string "$(cat ssh-key-github-com)"
+aws secretsmanager create-secret --name "${TF_VAR_project_name}/argocd/ssh-key-github-com" --description "Secrets used by Argocd" --secret-string "$(cat ssh-key-github-com)"
 rm ssh-key-github-com
 ```
 
@@ -52,7 +52,9 @@ rm ssh-key-github-com
 Use following command to clean up once you are done:
 
 ```
-terraform apply -destroy
+terraform apply -target module.platform
+terraform apply -target module.cluster
+terraform apply -target module.network
 ```
 
 There is still some work to be done to do a clean teardown. Following resourceds are not cleaned up automatically or are
@@ -66,5 +68,5 @@ You can use following AWS CLI command to get an idea of the resources that still
 
 ```
 export AWS_REGION="<SOME_AWS_REGION>"
-aws resource-groups search-resources  --resource-query "{\"Type\":\"TAG_FILTERS_1_0\",\"Query\":\"{\\\"ResourceTypeFilters\\\":[\\\"AWS::AllSupported\\\"],\\\"TagFilters\\\":[{\\\"Key\\\":\\\"Contributor\\\",\\\"Values\\\":[\\\"${TF_VAR_contributor}\\\"]}]}\"}"
+aws resource-groups search-resources  --resource-query "{\"Type\":\"TAG_FILTERS_1_0\",\"Query\":\"{\\\"ResourceTypeFilters\\\":[\\\"AWS::AllSupported\\\"],\\\"TagFilters\\\":[{\\\"Key\\\":\\\"Project\\\",\\\"Values\\\":[\\\"${TF_VAR_project_name}\\\"]}]}\"}"
 ```

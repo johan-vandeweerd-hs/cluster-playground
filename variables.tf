@@ -1,7 +1,6 @@
 variable "project_name" {
   description = "Name to use for the VPC, EKS cluster, etc and to use as prefix to name resources."
   type        = string
-  default     = ""
 }
 
 variable "git_url" {
@@ -9,7 +8,8 @@ variable "git_url" {
   type        = string
 }
 
-variable "contributor" {
-  description = "The name of the person contributing to this and who runs this infrastructure."
+variable "git_revision" {
+  description = "The Git revision used in the Argpcd application manifests."
   type        = string
+  default     = null
 }

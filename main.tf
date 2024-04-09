@@ -1,9 +1,10 @@
 locals {
-  name            = coalesce(var.project_name, "cluster-playground-${var.contributor}")
+  name            = var.project_name
   vpc_cidr        = "10.0.0.0/16"
   azs             = ["${data.aws_region.this.name}a", "${data.aws_region.this.name}b", "${data.aws_region.this.name}c"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  git_revision    = coalesce(var.git_revision, var.project_name)
 }
 
 module "network" {
@@ -33,16 +34,11 @@ module "platform" {
   source = "./modules/platform"
 
   git_url      = var.git_url
-  git_revision = var.contributor
+  git_revision = local.git_revision
 
   cluster_name                       = module.cluster.cluster_name
   cluster_endpoint                   = module.cluster.cluster_endpoint
   cluster_certificate_authority_data = module.cluster.cluster_certificate_authority_data
   cluster_oidc_provider              = module.cluster.cluster_oidc_provider
   cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
-
-  depends_on = [
-    module.network,
-    module.cluster,
-  ]
 }

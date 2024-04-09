@@ -16,9 +16,7 @@ terraform {
 provider "aws" {
   default_tags {
     tags = {
-      Project     = "hackathon-dec-2023"
-      Team        = "Awesome"
-      Contributor = var.contributor
+      Project     = var.project_name
     }
   }
 }
