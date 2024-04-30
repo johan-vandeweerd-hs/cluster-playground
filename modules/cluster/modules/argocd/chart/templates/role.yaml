@@ -1,7 +1,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: argocd
   name: argocd
 rules:
   - apiGroups:
@@ -9,6 +8,7 @@ rules:
     resources:
       - secrets
     verbs:
-      - get
       - create
+      - delete
+      - get
       - patch

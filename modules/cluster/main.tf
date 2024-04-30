@@ -49,3 +49,18 @@ module "aws_auth" {
     }
   ]
 }
+
+module "argocd" {
+  source = "./modules/argocd"
+
+  cluster_name              = module.eks.cluster_name
+  cluster_oidc_provider     = module.eks.oidc_provider
+  cluster_oidc_provider_arn = module.eks.oidc_provider_arn
+
+  git_url = var.git_url
+
+  depends_on = [
+    module.karpenter
+  ]
+}
+

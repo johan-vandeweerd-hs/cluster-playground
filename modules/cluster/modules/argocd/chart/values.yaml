@@ -217,6 +217,17 @@ argo-cd:
       ## Has higher precedence over `server.pdb.minAvailable`
       maxUnavailable: "1"
 
+    ingress:
+      enabled: true
+      ingressClassName: platform
+      hostname: argocd
+      annotations:
+        alb.ingress.kubernetes.io/backend-protocol: HTTPS
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80},{"HTTPS": 443}]'
+        alb.ingress.kubernetes.io/ssl-redirect: "443"
+        alb.ingress.kubernetes.io/target-type: ip
+
+
   ## Repo Server
   repoServer:
     resources:
