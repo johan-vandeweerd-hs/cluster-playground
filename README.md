@@ -6,10 +6,13 @@
 
 ## Cluster
 
-```sh
+### Create
+
+```shell
 export AWS_REGION="<SOME_AWS_REGION>"
 export TF_VAR_project_name="<PROJECT_NAME>"
 export TF_VAR_git_url="git@github.com:<USERNAME_OR_ORGANISATION>/<REPOSITORY_NAME>"
+export TF_VAR_git_revision="<BRANCH_NAME>"
 terraform init
 terraform apply -target module.network
 terraform apply -target module.cluster
@@ -19,7 +22,19 @@ terraform apply -target module.platform
 When the cluster is running, you need the following commands to update your kubeconfig.
 
 ```
-aws eks update-kubeconfig --name ${TF_VAR_project_name}
+aws eks update-kubeconfig --name ${TF_VAR_project_name} --alias ${TF_VAR_project_name} 
+```
+
+### Destroy
+
+```shell
+terraform apply -target module.platform -destroy
+kubectl delete poddisruptionbudget -A --all
+kubectl delete nodepool --all
+kubectl delete nodeclaims --all
+kubectl delete ec2nodeclass --all
+terraform apply -target module.cluster -destroy
+terraform apply -target module.network -destroy
 ```
 
 ## Argocd
@@ -48,21 +63,6 @@ rm ssh-key-github-com
 ```
 
 # Teardown
-
-Use following command to clean up once you are done:
-
-```
-terraform apply -target module.platform
-terraform apply -target module.cluster
-terraform apply -target module.network
-```
-
-There is still some work to be done to do a clean teardown. Following resourceds are not cleaned up automatically or are
-blocking the destroy:
-
-- EC2 instances managed by Karpenter
-- Load balancers managed by AWS Load Balancer Controller
-- DNS records managed by External DNS
 
 You can use following AWS CLI command to get an idea of the resources that still exist.
 
