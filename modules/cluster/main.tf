@@ -19,7 +19,7 @@ module "eks" {
 
   iam_role_name            = "${var.cluster_name}-cluster"
   iam_role_use_name_prefix = false
-  iam_role_description     = "TF: IAM role used by the ${var.cluster_name} cluster."
+  iam_role_description     = "TF: IAM role used by the ${var.cluster_name} cluster control plane."
 
   cluster_encryption_policy_name            = "${var.cluster_name}-encryption"
   cluster_encryption_policy_use_name_prefix = false
