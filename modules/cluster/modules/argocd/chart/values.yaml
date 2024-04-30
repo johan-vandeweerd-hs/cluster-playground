@@ -166,7 +166,7 @@ argo-cd:
 
   ## Redis
   redis:
-    enabled: false
+    enabled: true
 
   ## Server
   server:
