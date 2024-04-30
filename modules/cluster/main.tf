@@ -10,6 +10,8 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
+  enable_cluster_creator_admin_permissions = true
+
   cloudwatch_log_group_retention_in_days = 7
 
   create_cluster_security_group = false
@@ -32,22 +34,6 @@ module "karpenter" {
   cluster_oidc_provider_arn = module.eks.oidc_provider_arn
 
   private_subnet_ids = var.private_subnet_ids
-}
-
-module "aws_auth" {
-  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
-
-  manage_aws_auth_configmap = true
-  aws_auth_roles            = [
-    {
-      rolearn  = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/${var.cluster_name}-karpenter-node"
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups   = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    }
-  ]
 }
 
 module "argocd" {
