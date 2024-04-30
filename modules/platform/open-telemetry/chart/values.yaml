@@ -1,4 +1,6 @@
 opentelemetry-collector:
+  nameOverride: opentelemetry-collector-agent
+
   mode: daemonset
 
   presets:
