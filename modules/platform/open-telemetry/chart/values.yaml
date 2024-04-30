@@ -73,8 +73,6 @@ opentelemetry-collector:
       enabled: false
     zipkin:
       enabled: false
-    metrics:
-      enabled: true
 
   resources:
     requests:
@@ -84,9 +82,3 @@ opentelemetry-collector:
       memory: 512Mi
 
   hostNetwork: true
-
-  podMonitor:
-    enabled: true
-
-  serviceMonitor:
-    enabled: true
