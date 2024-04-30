@@ -1,6 +1,5 @@
 opentelemetry-collector:
-  nameOverride: ot-agent
-  fullnameOverride: full-ot-agent
+  nameOverride: open-telemetry-collector
 
   mode: daemonset
 
