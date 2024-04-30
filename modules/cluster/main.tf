@@ -22,17 +22,16 @@ module "eks" {
   cluster_encryption_policy_name            = "${var.cluster_name}-encryption"
   cluster_encryption_policy_use_name_prefix = false
   cluster_encryption_policy_description     = "TF: IAM policy used by the ${var.cluster_name} cluster for encryption."
+}
 
-  fargate_profiles = {
-    karpenter = {
-      iam_role_name            = "${var.cluster_name}-fargate-karpenter"
-      iam_role_use_name_prefix = false
-      iam_role_description     = "TF: IAM role used by Fargate for karpenter profile."
-      selectors                = [
-        { namespace = "karpenter" }
-      ]
-    }
-  }
+module "karpenter" {
+  source = "./modules/karpenter"
+
+  cluster_name              = module.eks.cluster_name
+  cluster_endpoint          = module.eks.cluster_endpoint
+  cluster_oidc_provider_arn = module.eks.oidc_provider_arn
+
+  private_subnet_ids = var.private_subnet_ids
 }
 
 module "aws_auth" {
