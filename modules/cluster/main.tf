@@ -64,3 +64,15 @@ module "argocd" {
   ]
 }
 
+module "addons" {
+  source = "./modules/addons"
+
+  cluster_name              = module.eks.cluster_name
+  cluster_version           = module.eks.cluster_version
+  cluster_endpoint          = module.eks.cluster_endpoint
+  cluster_oidc_provider_arn = module.eks.oidc_provider_arn
+
+  depends_on = [
+    module.karpenter
+  ]
+}
