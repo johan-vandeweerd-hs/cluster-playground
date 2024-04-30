@@ -1,5 +1,5 @@
 opentelemetry-collector:
-  nameOverride: open-telemetry-collector
+  fullnameOverride: open-telemetry-collector
 
   mode: daemonset
 
