@@ -4,11 +4,11 @@ locals {
 
 resource "kubectl_manifest" "application" {
   yaml_body = templatefile("${path.module}/chart/application.yaml", {
-    name           = local.module_name
-    namespace      = local.module_name
-    gitUrl         = var.git_url
-    revision       = var.git_revision
-    helmParameters = merge({for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value}, {
+    name      = local.module_name
+    namespace = local.module_name
+    gitUrl    = var.git_url
+    revision  = var.git_revision
+    helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
       clusterName                                                                                  = var.cluster_name
       certificateArn                                                                               = module.acm.acm_certificate_arn
       "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "this" {
 
 data "aws_iam_policy_document" "this" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:AuthorizeSecurityGroupIngress",
       "ec2:RevokeSecurityGroupIngress"
@@ -57,13 +57,13 @@ data "aws_iam_policy_document" "this" {
     condition {
       test     = "ArnEquals"
       variable = "ec2:Vpc"
-      values   = [
+      values = [
         "arn:aws:ec2:${data.aws_region.this.name}:${data.aws_caller_identity.this.account_id}:vpc/${data.aws_vpc.this.id}"
       ]
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "iam:CreateServiceLinkedRole"
     ]
@@ -75,7 +75,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:DescribeAccountAttributes",
       "ec2:DescribeAddresses",
@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "this" {
     resources = ["*"]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "cognito-idp:DescribeUserPoolClient",
       "acm:ListCertificates",
@@ -127,14 +127,14 @@ data "aws_iam_policy_document" "this" {
     resources = ["*"]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:CreateSecurityGroup"
     ]
     resources = ["*"]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:CreateTags"
     ]
@@ -151,7 +151,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:CreateTags",
       "ec2:DeleteTags"
@@ -169,7 +169,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:AuthorizeSecurityGroupIngress",
       "ec2:RevokeSecurityGroupIngress",
@@ -183,7 +183,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:CreateLoadBalancer",
       "elasticloadbalancing:CreateTargetGroup"
@@ -196,7 +196,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:CreateListener",
       "elasticloadbalancing:DeleteListener",
@@ -206,7 +206,7 @@ data "aws_iam_policy_document" "this" {
     resources = ["*"]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:AddTags",
       "elasticloadbalancing:RemoveTags"
@@ -228,7 +228,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:AddTags",
       "elasticloadbalancing:RemoveTags"
@@ -241,7 +241,7 @@ data "aws_iam_policy_document" "this" {
     ]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:SetIpAddressType",
@@ -260,7 +260,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:AddTags"
     ]
@@ -272,7 +272,7 @@ data "aws_iam_policy_document" "this" {
     condition {
       test     = "StringEquals"
       variable = "elasticloadbalancing:CreateAction"
-      values   = [
+      values = [
         "CreateTargetGroup",
         "CreateLoadBalancer"
       ]
@@ -284,7 +284,7 @@ data "aws_iam_policy_document" "this" {
     }
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:RegisterTargets",
       "elasticloadbalancing:DeregisterTargets"
@@ -294,7 +294,7 @@ data "aws_iam_policy_document" "this" {
     ]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "elasticloadbalancing:SetWebAcl",
       "elasticloadbalancing:ModifyListener",

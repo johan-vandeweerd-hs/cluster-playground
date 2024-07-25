@@ -30,9 +30,9 @@ module "iam_roles" {
   iam_role_description     = "TF: IAM Role used by Karptener for IRSA."
   iam_role_use_name_prefix = false
 
-  node_iam_role_name                = "${var.cluster_name}-karpenter-node"
-  node_iam_role_description         = "TF: IAM role used by Karpenter managed nodes."
-  node_iam_role_use_name_prefix     = false
+  node_iam_role_name            = "${var.cluster_name}-karpenter-node"
+  node_iam_role_description     = "TF: IAM role used by Karpenter managed nodes."
+  node_iam_role_use_name_prefix = false
   node_iam_role_additional_policies = {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
@@ -59,9 +59,9 @@ resource "helm_release" "this" {
   }
 
   set {
-    name  = "templatesChecksum"
+    name = "templatesChecksum"
     value = md5(join("\n", [
-      for filename in fileset(path.module, "chart/templates/**") :file("${path.module}/${filename}")
+      for filename in fileset(path.module, "chart/templates/**") : file("${path.module}/${filename}")
     ]))
   }
 

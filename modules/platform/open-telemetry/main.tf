@@ -4,10 +4,10 @@ locals {
 
 resource "kubectl_manifest" "application" {
   yaml_body = templatefile("${path.module}/chart/application.yaml", {
-    name           = local.module_name
-    namespace      = local.module_name
-    gitUrl         = var.git_url
-    revision       = var.git_revision
+    name      = local.module_name
+    namespace = local.module_name
+    gitUrl    = var.git_url
+    revision  = var.git_revision
     helmParameters = {
       awsRegion   = data.aws_region.this.name
       clusterName = var.cluster_name
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "cloudwatch" {
 
 data "aws_iam_policy_document" "cloudwatch" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "logs:DescribeLogGroups",
       "logs:DescribeLogStreams",

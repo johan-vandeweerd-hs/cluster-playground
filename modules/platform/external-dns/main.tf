@@ -4,13 +4,13 @@ locals {
 
 resource "kubectl_manifest" "application" {
   yaml_body = templatefile("${path.module}/chart/application.yaml", {
-    name            = local.module_name
-    namespace       = local.module_name
-    gitUrl          = var.git_url
-    revision        = var.git_revision
+    name      = local.module_name
+    namespace = local.module_name
+    gitUrl    = var.git_url
+    revision  = var.git_revision
     helmParameters = {
-      awsRegion   = data.aws_region.this.name
-      clusterName = var.cluster_name
+      awsRegion                                                                    = data.aws_region.this.name
+      clusterName                                                                  = var.cluster_name
       "external-dns.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
     }
   })
@@ -45,14 +45,14 @@ resource "aws_iam_policy" "route53" {
 
 data "aws_iam_policy_document" "route53" {
   statement {
-    effect    = "Allow"
+    effect = "Allow"
     actions = [
       "route53:ChangeResourceRecordSets"
     ]
     resources = ["arn:aws:route53:::hostedzone/*"]
   }
   statement {
-    effect    = "Allow"
+    effect = "Allow"
     actions = [
       "route53:ListHostedZones",
       "route53:ListResourceRecordSets"

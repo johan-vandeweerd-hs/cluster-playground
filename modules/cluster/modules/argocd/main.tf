@@ -13,9 +13,9 @@ resource "helm_release" "this" {
   }
 
   set {
-    name  = "templatesChecksum"
+    name = "templatesChecksum"
     value = md5(join("\n", [
-      for filename in fileset(path.module, "chart/templates/**") :file("${path.module}/${filename}")
+      for filename in fileset(path.module, "chart/templates/**") : file("${path.module}/${filename}")
     ]))
   }
 
@@ -73,7 +73,7 @@ resource "aws_iam_policy" "secrets_manager_argocd_read_only" {
 
 data "aws_iam_policy_document" "secrets_manager_argocd_read_only" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "secretsmanager:GetSecretValue"
     ]
