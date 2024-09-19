@@ -13,6 +13,7 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   cloudwatch_log_group_retention_in_days = 7
+  cluster_enabled_log_types              = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   create_cluster_security_group = false
   create_node_security_group    = false
