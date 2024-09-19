@@ -11,6 +11,18 @@ data "aws_vpc" "this" {
   }
 }
 
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["${var.cluster_name}-public-*"]
+  }
+}
+
 data "aws_security_group" "this" {
   vpc_id = data.aws_vpc.this.id
 
@@ -26,4 +38,3 @@ data "aws_default_tags" "this" {
 data "aws_route53_zone" "hackathon" {
   name = "hackathon.hootops.com"
 }
-

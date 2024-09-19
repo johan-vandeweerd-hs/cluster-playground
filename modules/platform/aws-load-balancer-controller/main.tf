@@ -306,32 +306,97 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
-# DNS
-resource "aws_route53_zone" "cluster_hackathon_hootops_com" {
-  name    = "${var.cluster_name}.hackathon.hootops.com"
-  comment = "TF: Subdomain for ${var.cluster_name} of hackathon.hootops.com."
-}
-
-resource "aws_route53_record" "hackathon_hootops" {
-  zone_id = data.aws_route53_zone.hackathon.zone_id
-  name    = var.cluster_name
-  type    = "NS"
-  ttl     = 300
-  records = aws_route53_zone.cluster_hackathon_hootops_com.name_servers
-}
-
 # Certificate
 module "acm" {
   source = "terraform-aws-modules/acm/aws"
 
-  domain_name = "${var.cluster_name}.hackathon.hootops.com"
-  zone_id     = aws_route53_zone.cluster_hackathon_hootops_com.zone_id
+  domain_name = "*.${var.cluster_name}.hackathon.hootops.com"
+  zone_id     = data.aws_route53_zone.hackathon.zone_id
 
   validation_method = "DNS"
 
-  subject_alternative_names = [
-    "*.${var.cluster_name}.hackathon.hootops.com"
-  ]
-
   wait_for_validation = true
+}
+
+# Load Balancer
+module "alb" {
+  source = "terraform-aws-modules/alb/aws"
+
+  name    = var.cluster_name
+  vpc_id  = data.aws_vpc.this.id
+  subnets = data.aws_subnets.public.ids
+
+  security_group_name        = "${var.cluster_name}-alb"
+  security_group_description = "TF: Security group used by the ALB for the ${var.cluster_name} cluster."
+  security_group_ingress_rules = {
+    all_http = {
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      description = "HTTP web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+    all_https = {
+      from_port   = 443
+      to_port     = 443
+      ip_protocol = "tcp"
+      description = "HTTPS web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+
+  listeners = {
+    http-https-redirect = {
+      port     = 80
+      protocol = "HTTP"
+      redirect = {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+    https = {
+      port            = 443
+      protocol        = "HTTPS"
+      certificate_arn = module.acm.acm_certificate_arn
+      forward = {
+        target_group_key = "eks"
+      }
+    }
+  }
+
+  target_groups = {
+    eks = {
+      name              = "${var.cluster_name}-eks"
+      protocol          = "HTTP"
+      port              = 80
+      target_type       = "ip"
+      create_attachment = false
+      health_check = {
+        interval            = 10
+        timeout             = 5
+        healthy_threshold   = 2
+        unhealthy_threshold = 2
+      }
+    }
+  }
+}
+
+# DNS
+resource "aws_route53_record" "alias_star_projectname_hackathon_hootops" {
+  zone_id = data.aws_route53_zone.hackathon.zone_id
+  name    = "*.${var.cluster_name}"
+  type    = "A"
+
+  alias {
+    zone_id                = module.alb.zone_id
+    name                   = module.alb.dns_name
+    evaluate_target_health = false
+  }
 }
