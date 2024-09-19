@@ -2,3 +2,4 @@
 terraform.tfstate*
 Chart.lock
 charts/
+.DS_Store

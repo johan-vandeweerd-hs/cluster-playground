@@ -1,26 +1,34 @@
-locals {
-  module_name = basename(abspath(path.module))
-}
-
-resource "kubectl_manifest" "application" {
-  yaml_body = templatefile("${path.module}/chart/application.yaml", {
-    name      = local.module_name
-    namespace = local.module_name
+# ArgoCD applications
+resource "kubectl_manifest" "application_aws_load_balancer_controller" {
+  yaml_body = templatefile("${path.module}/chart/aws-load-balancer-controller/application.yaml", {
+    name      = "aws-load-balancer-controller"
+    namespace = "aws-load-balancer-controller"
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
-      clusterName                                                                                  = var.cluster_name
-      certificateArn                                                                               = module.acm.acm_certificate_arn
       "aws-load-balancer-controller.clusterName"                                                   = var.cluster_name
-      "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role.iam_role_arn
+      "aws-load-balancer-controller.serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn" = module.iam_role_aws_load_balancer_controller.iam_role_arn
       "aws-load-balancer-controller.vpcId"                                                         = data.aws_vpc.this.id
       "aws-load-balancer-controller.backendSecurityGroup"                                          = data.aws_security_group.this.id
     })
   })
 }
 
+resource "kubectl_manifest" "application_traefik" {
+  yaml_body = templatefile("${path.module}/chart/traefik/application.yaml", {
+    name      = "traefik"
+    namespace = "traefik"
+    gitUrl    = var.git_url
+    revision  = var.git_revision
+    helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
+      "targetGroupArn"              = module.nlb.target_groups["traefik"].arn
+      "loadBalancerSecurityGroupId" = module.nlb.security_group_id
+    })
+  })
+}
+
 # IAM
-module "iam_role" {
+module "iam_role_aws_load_balancer_controller" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
   role_name        = "${var.cluster_name}-aws-load-balancer-controller"
@@ -35,18 +43,18 @@ module "iam_role" {
   }
 
   role_policy_arns = {
-    "aws-load-balancer-controller" = aws_iam_policy.this.arn
+    "aws-load-balancer-controller" = aws_iam_policy.aws_load_balancer_controller.arn
   }
 }
 
-resource "aws_iam_policy" "this" {
+resource "aws_iam_policy" "aws_load_balancer_controller" {
   name        = "${var.cluster_name}-aws-load-balancer-controller"
   description = "TF: IAM policy with the necessary permissions for AWS Load Balancer controller."
 
-  policy = data.aws_iam_policy_document.this.json
+  policy = data.aws_iam_policy_document.aws_load_balancer_controller.json
 }
 
-data "aws_iam_policy_document" "this" {
+data "aws_iam_policy_document" "aws_load_balancer_controller" {
   statement {
     effect = "Allow"
     actions = [
@@ -306,32 +314,79 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
-# DNS
-resource "aws_route53_zone" "cluster_hackathon_hootops_com" {
-  name    = "${var.cluster_name}.hackathon.hootops.com"
-  comment = "TF: Subdomain for ${var.cluster_name} of hackathon.hootops.com."
-}
-
-resource "aws_route53_record" "hackathon_hootops" {
-  zone_id = data.aws_route53_zone.hackathon.zone_id
-  name    = var.cluster_name
-  type    = "NS"
-  ttl     = 300
-  records = aws_route53_zone.cluster_hackathon_hootops_com.name_servers
-}
-
 # Certificate
 module "acm" {
   source = "terraform-aws-modules/acm/aws"
 
-  domain_name = "${var.cluster_name}.hackathon.hootops.com"
-  zone_id     = aws_route53_zone.cluster_hackathon_hootops_com.zone_id
+  domain_name = "*.${var.cluster_name}.hackathon.hootops.com"
+  zone_id     = data.aws_route53_zone.hackathon.zone_id
 
   validation_method = "DNS"
 
-  subject_alternative_names = [
-    "*.${var.cluster_name}.hackathon.hootops.com"
-  ]
-
   wait_for_validation = true
+}
+
+# Load Balancer
+module "nlb" {
+  source = "terraform-aws-modules/alb/aws"
+
+  name    = var.cluster_name
+  vpc_id  = data.aws_vpc.this.id
+  subnets = data.aws_subnets.public.ids
+
+  load_balancer_type         = "network"
+  enable_deletion_protection = false
+
+  security_group_name            = "${var.cluster_name}-nlb"
+  security_group_use_name_prefix = false
+  security_group_description     = "TF: Security group used by the NLB for the ${var.cluster_name} cluster."
+  security_group_ingress_rules = {
+    https = {
+      from_port   = 443
+      to_port     = 443
+      ip_protocol = "tcp"
+      description = "HTTPS web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+
+  listeners = {
+    https = {
+      port            = 443
+      protocol        = "TLS"
+      certificate_arn = module.acm.acm_certificate_arn
+      forward = {
+        target_group_key = "traefik"
+      }
+    }
+  }
+
+  target_groups = {
+    traefik = {
+      name_prefix       = "eks"
+      protocol          = "TLS"
+      port              = 443
+      target_type       = "ip"
+      create_attachment = false
+    }
+  }
+}
+
+# DNS
+resource "aws_route53_record" "alias_star_projectname_hackathon_hootops" {
+  zone_id = data.aws_route53_zone.hackathon.zone_id
+  name    = "*.${var.cluster_name}"
+  type    = "A"
+
+  alias {
+    zone_id                = module.nlb.zone_id
+    name                   = module.nlb.dns_name
+    evaluate_target_health = false
+  }
 }
