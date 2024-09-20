@@ -77,3 +77,17 @@ data "aws_iam_policy_document" "secrets_manager_argocd_read_only" {
     ]
   }
 }
+
+resource "aws_secretsmanager_secret" "ssh_key" {
+  name        = "${var.cluster_name}/argocd/ssh-key"
+  description = "TF: Secret for Github SSH key used by Argocd"
+}
+
+data "local_file" "ssh_key" {
+  filename = "${path.module}/../../../../id_rsa"
+}
+
+resource "aws_secretsmanager_secret_version" "ssh_key" {
+  secret_id     = aws_secretsmanager_secret.ssh_key.id
+  secret_string = data.local_file.ssh_key.content
+}
