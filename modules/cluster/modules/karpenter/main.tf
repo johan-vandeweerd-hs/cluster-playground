@@ -54,9 +54,9 @@ resource "helm_release" "this" {
   create_namespace = true
 
   set {
-    name  = "checksum"
+    name = "checksum"
     value = md5(join("\n", [
-      for filename in fileset(path.module, "chart/**.yaml") :file("${path.module}/${filename}")
+      for filename in fileset(path.module, "chart/**.yaml") : file("${path.module}/${filename}")
     ]))
   }
 
