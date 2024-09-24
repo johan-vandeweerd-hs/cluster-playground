@@ -1,10 +1,11 @@
-apiVersion: karpenter.k8s.aws/v1beta1
+apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
 metadata:
   name: default
 spec:
   instanceProfile: {{ .Values.karpenter.settings.clusterName }}-karpenter-node
-  amiFamily: Bottlerocket
+  amiSelectorTerms:
+    - alias: bottlerocket@latest
   subnetSelectorTerms:
     - tags:
         Name: {{ .Values.karpenter.settings.clusterName }}-private-*
