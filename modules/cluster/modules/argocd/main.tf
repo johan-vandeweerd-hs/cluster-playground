@@ -79,8 +79,9 @@ data "aws_iam_policy_document" "secrets_manager_argocd_read_only" {
 }
 
 resource "aws_secretsmanager_secret" "ssh_key" {
-  name        = "${var.cluster_name}/argocd/ssh-key"
-  description = "TF: Secret for Github SSH key used by Argocd"
+  name                    = "${var.cluster_name}/argocd/ssh-key"
+  description             = "TF: Secret for Github SSH key used by Argocd"
+  recovery_window_in_days = 0
 }
 
 data "local_file" "ssh_key" {
