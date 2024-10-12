@@ -56,7 +56,7 @@ resource "helm_release" "this" {
   set {
     name = "checksum"
     value = md5(join("\n", [
-      for filename in fileset(path.module, "chart/**.yaml") : file("${path.module}/${filename}")
+      for filename in fileset(path.module, "chart/**/**.yaml") : file("${path.module}/${filename}")
     ]))
   }
 
