@@ -1,5 +1,6 @@
 aws-load-balancer-controller:
   replicaCount: 2
+  revisionHistoryLimit: 0
 
   enableCertManager: true
 
