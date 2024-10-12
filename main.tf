@@ -21,7 +21,7 @@ module "cluster" {
   source = "./modules/cluster"
 
   cluster_name    = local.name
-  cluster_version = "1.29"
+  cluster_version = "1.31"
 
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
