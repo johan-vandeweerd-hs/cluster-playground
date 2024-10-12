@@ -3,7 +3,6 @@ traefik:
     pullPolicy: Always
 
   deployment:
-    kind: DaemonSet
     revisionHistoryLimit: 0
 
   ingressClass:
@@ -43,3 +42,8 @@ traefik:
       memory: 100Mi
     limits:
       memory: 100Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
