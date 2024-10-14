@@ -8,9 +8,9 @@ resource "helm_release" "this" {
   create_namespace = true
 
   set {
-    name  = "checksum"
+    name = "checksum"
     value = md5(join("\n", [
-      for filename in fileset(path.module, "chart/**.yaml") :file("${path.module}/${filename}")
+      for filename in fileset(path.module, "chart/**/**.yaml") : file("${path.module}/${filename}")
     ]))
   }
 
@@ -76,4 +76,19 @@ data "aws_iam_policy_document" "secrets_manager_argocd_read_only" {
       "arn:aws:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.this.account_id}:secret:${var.cluster_name}/argocd/*"
     ]
   }
+}
+
+resource "aws_secretsmanager_secret" "ssh_key" {
+  name                    = "${var.cluster_name}/argocd/ssh-key"
+  description             = "TF: Secret for Github SSH key used by Argocd"
+  recovery_window_in_days = 0
+}
+
+data "local_file" "ssh_key" {
+  filename = "${path.module}/../../../../id_rsa"
+}
+
+resource "aws_secretsmanager_secret_version" "ssh_key" {
+  secret_id     = aws_secretsmanager_secret.ssh_key.id
+  secret_string = data.local_file.ssh_key.content
 }

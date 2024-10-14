@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: ${gitUrl}
-    path: modules/platform/${name}/chart
+    path: modules/platform/ingress/chart/${name}
     targetRevision: ${revision}
     helm:
       valueFiles:

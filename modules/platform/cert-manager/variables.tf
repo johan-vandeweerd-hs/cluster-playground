@@ -13,16 +13,6 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "cluster_endpoint" {
-  description = "The endpoint of the Kubernetes cluster"
-  type        = string
-}
-
-variable "cluster_certificate_authority_data" {
-  description = "The certificate authority data of the Kubernetes cluster"
-  type        = string
-}
-
 variable "cluster_oidc_provider" {
   description = "The name of the OIDC provider noof the Kubernetes cluster"
   type        = string
