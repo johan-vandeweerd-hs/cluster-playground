@@ -3,3 +3,5 @@ terraform.tfstate*
 Chart.lock
 charts/
 .DS_Store
+id_rsa*
+variables.auto.tfvars
