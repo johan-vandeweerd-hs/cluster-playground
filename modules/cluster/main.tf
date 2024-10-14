@@ -63,3 +63,10 @@ module "addons" {
     module.karpenter
   ]
 }
+
+module "pod_identity" {
+  source = "./modules/pod-identity"
+
+  cluster_name = module.eks.cluster_name
+  cluster_arn  = module.eks.cluster_arn
+}

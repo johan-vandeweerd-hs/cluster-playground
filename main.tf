@@ -1,5 +1,5 @@
 locals {
-  name = var.project_name
+  name         = var.project_name
   git_revision = coalesce(var.git_revision, var.project_name)
 }
 
@@ -28,9 +28,9 @@ module "platform" {
   git_url      = var.git_url
   git_revision = local.git_revision
 
-  cluster_name                       = module.cluster.cluster_name
-  cluster_oidc_provider              = module.cluster.cluster_oidc_provider
-  cluster_oidc_provider_arn          = module.cluster.cluster_oidc_provider_arn
+  cluster_name              = module.cluster.cluster_name
+  cluster_oidc_provider     = module.cluster.cluster_oidc_provider
+  cluster_oidc_provider_arn = module.cluster.cluster_oidc_provider_arn
 }
 
 module "product" {
