@@ -1,3 +1,14 @@
+module "aws_controller_kubernetes" {
+  source = "./aws-controller-kubernetes"
+
+  git_url      = var.git_url
+  git_revision = var.git_revision
+
+  cluster_name              = var.cluster_name
+  cluster_oidc_provider     = var.cluster_oidc_provider
+  cluster_oidc_provider_arn = var.cluster_oidc_provider_arn
+}
+
 module "cert_manager" {
   source = "./cert-manager"
 
