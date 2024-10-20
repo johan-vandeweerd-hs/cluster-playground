@@ -355,6 +355,9 @@ module "nlb" {
       cidr_ipv4   = "0.0.0.0/0"
     }
   }
+  security_group_tags = {
+    Name = "${var.cluster_name}-nlb"
+  }
 
   listeners = {
     https = {
