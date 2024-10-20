@@ -86,6 +86,17 @@ argo-cd:
       ## Ref: https://argo-cd.readthedocs.io/en/latest/faq/#how-to-disable-admin-user
       admin.enabled: true
 
+      # Always mark Ingress resources as Healthy. By default, Argocd marks an Ingress resource as Healthy once the
+      # `status.loadBalancer.ingress` field is populated. Ingress resources get this value copied from the Traefik
+      # service `status.loadBalancer` field. Because this setup uses AWS Load Balancer Controller with
+      # TargetGroupBinding, the Traefik service status field never gets updated because the Traefik service is not
+      # tight to an AWS load balancer.
+      resource.customizations.health.networking.k8s.io_Ingress: |
+        hs = {}
+        hs.status = "Healthy"
+        hs.message = ""
+        return hs
+
     # Argo CD configuration parameters
     ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cmd-params-cm.yaml
     params:
