@@ -3,6 +3,8 @@ opentelemetry-collector:
 
   mode: daemonset
 
+  priorityClassName: system-node-critical
+
   presets:
     logsCollection:
       enabled: true
