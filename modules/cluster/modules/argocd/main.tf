@@ -60,7 +60,7 @@ module "iam_role" {
 }
 
 resource "aws_iam_policy" "secrets_manager_argocd_read_only" {
-  name        = "secrets-manager-argocd-read-only"
+  name        = "${var.cluster_name}-secrets-manager-argocd-read-only"
   description = "TF: IAM policy to allow read access for secrets of Argocd"
 
   policy = data.aws_iam_policy_document.secrets_manager_argocd_read_only.json
