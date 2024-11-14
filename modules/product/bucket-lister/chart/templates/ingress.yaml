@@ -5,6 +5,7 @@ metadata:
     app: bucket-lister
   name: bucket-lister
 spec:
+  ingressClassName: ingress
   rules:
     - host: bucket-lister.{{ .Values.projectName }}.hackathon.hootops.com
       http:

@@ -5,6 +5,7 @@ metadata:
     app: httpbin
   name: httpbin
 spec:
+  ingressClassName: ingress
   rules:
     - host: httpbin.{{ .Values.projectName }}.hackathon.hootops.com
       http:
