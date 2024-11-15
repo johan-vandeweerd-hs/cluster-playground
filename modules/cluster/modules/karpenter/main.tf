@@ -37,6 +37,7 @@ module "iam_roles" {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 
+  # IRSA is used instead of Pod Identity because Karpenter runs on Fargate and no Pod Identity pods are available yet.
   enable_irsa             = true
   create_instance_profile = true
   create_access_entry     = true
