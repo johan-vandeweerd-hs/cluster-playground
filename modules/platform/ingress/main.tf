@@ -35,7 +35,7 @@ module "iam_role_aws_load_balancer_controller" {
   use_name_prefix = "false"
 
   attach_aws_lb_controller_targetgroup_binding_only_policy = true
-  aws_lb_controller_targetgroup_arns                       = ["arn:aws:elasticloadbalancing:*:*:targetgroup/eks*"]
+  aws_lb_controller_targetgroup_arns                       = module.nlb.target_groups[*].arn
 }
 
 resource "aws_eks_pod_identity_association" "this" {
