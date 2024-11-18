@@ -30,6 +30,8 @@ aws-load-balancer-controller:
           app.kubernetes.io/name: aws-load-balancer-controller
           app.kubernetes.io/instance: aws-load-balancer-controller
 
+  enableBackendSecurityGroup: false
+
   createIngressClassResource: false
   ingressClassParams:
     create: false

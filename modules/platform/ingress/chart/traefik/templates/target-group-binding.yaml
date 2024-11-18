@@ -8,11 +8,3 @@ spec:
     port: 443
   targetType: ip
   targetGroupARN: {{ .Values.targetGroupArn }}
-  networking:
-    ingress:
-      - from:
-          - securityGroup:
-              groupID: {{ .Values.loadBalancerSecurityGroupId }}
-        ports:
-          - protocol: TCP
-            port: 8443

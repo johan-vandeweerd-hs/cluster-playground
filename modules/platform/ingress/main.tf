@@ -6,9 +6,8 @@ resource "kubectl_manifest" "application_aws_load_balancer_controller" {
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
-      "aws-load-balancer-controller.clusterName"          = var.project_name
-      "aws-load-balancer-controller.vpcId"                = data.aws_vpc.this.id
-      "aws-load-balancer-controller.backendSecurityGroup" = data.aws_security_group.this.id
+      "aws-load-balancer-controller.clusterName" = var.project_name
+      "aws-load-balancer-controller.vpcId"       = data.aws_vpc.this.id
     })
   })
 }
@@ -20,8 +19,7 @@ resource "kubectl_manifest" "application_traefik" {
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
-      "targetGroupArn"              = module.nlb.target_groups["traefik"].arn
-      "loadBalancerSecurityGroupId" = module.nlb.security_group_id
+      "targetGroupArn" = module.nlb.target_groups["traefik"].arn
     })
   })
 }
@@ -35,7 +33,7 @@ module "iam_role_aws_load_balancer_controller" {
   use_name_prefix = "false"
 
   attach_aws_lb_controller_targetgroup_binding_only_policy = true
-  aws_lb_controller_targetgroup_arns                       = module.nlb.target_groups[*].arn
+  aws_lb_controller_targetgroup_arns                       = values(module.nlb.target_groups)[*].arn
 }
 
 resource "aws_eks_pod_identity_association" "this" {
@@ -110,6 +108,17 @@ module "nlb" {
       create_attachment = false
     }
   }
+}
+
+# Security group
+resource "aws_security_group_rule" "allow_nlb_to_worker_nodes_on_8443" {
+  security_group_id        = data.aws_security_group.this.id
+  description              = "TF: Allow NLB to communicate with worker nodes on port 8443"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 8443
+  to_port                  = 8443
+  source_security_group_id = module.nlb.security_group_id
 }
 
 # DNS
