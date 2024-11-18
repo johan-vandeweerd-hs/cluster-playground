@@ -6,8 +6,8 @@ resource "kubectl_manifest" "application_aws_load_balancer_controller" {
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
-      "aws-load-balancer-controller.clusterName" = var.project_name
       "aws-load-balancer-controller.vpcId"       = data.aws_vpc.this.id
+      "aws-load-balancer-controller.clusterName" = var.project_name
     })
   })
 }

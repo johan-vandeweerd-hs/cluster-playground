@@ -4,4 +4,4 @@ version: 0.0.1
 dependencies:
   - repository: https://aws.github.io/eks-charts
     name: aws-load-balancer-controller
-    version: 1.6.2
+    version: 1.10.0
