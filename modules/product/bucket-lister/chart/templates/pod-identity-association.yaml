@@ -2,7 +2,8 @@ apiVersion: eks.services.k8s.aws/v1alpha1
 kind: PodIdentityAssociation
 metadata:
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-10"
   labels:
     app: bucket-lister
   name: bucket-lister
