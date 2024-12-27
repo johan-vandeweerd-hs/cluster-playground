@@ -22,6 +22,10 @@ module "cluster" {
 }
 
 module "platform" {
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
   source = "./modules/platform"
 
   project_name = var.project_name

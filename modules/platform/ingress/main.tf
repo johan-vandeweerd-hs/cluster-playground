@@ -19,7 +19,7 @@ resource "kubectl_manifest" "application_traefik" {
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = merge({ for key, value in data.aws_default_tags.this.tags : "tags.${key}" => value }, {
-      "targetGroupArn" = module.nlb.target_groups["traefik"].arn
+      "targetGroupArn" = module.alb.target_groups["traefik"].arn
     })
   })
 }
@@ -33,7 +33,7 @@ module "iam_role_aws_load_balancer_controller" {
   use_name_prefix = "false"
 
   attach_aws_lb_controller_targetgroup_binding_only_policy = true
-  aws_lb_controller_targetgroup_arns                       = values(module.nlb.target_groups)[*].arn
+  aws_lb_controller_targetgroup_arns                       = values(module.alb.target_groups)[*].arn
 }
 
 resource "aws_eks_pod_identity_association" "this" {
@@ -43,8 +43,16 @@ resource "aws_eks_pod_identity_association" "this" {
   role_arn        = module.iam_role_aws_load_balancer_controller.iam_role_arn
 }
 
-# Certificate
-module "acm" {
+# Preshared key
+resource "random_uuid" "psk" {
+}
+
+# Cloudfront
+module "certificate_cloudfront" {
+  providers = {
+    aws = aws.us_east_1
+  }
+
   source = "terraform-aws-modules/acm/aws"
 
   domain_name = "*.${var.project_name}.${var.hosted_zone}"
@@ -55,27 +63,89 @@ module "acm" {
   wait_for_validation = true
 }
 
+module "cdn" {
+  source = "terraform-aws-modules/cloudfront/aws"
+
+  aliases = ["*.${var.project_name}.${var.hosted_zone}"]
+
+  comment         = "TF: Cloudfont distribution in front of the ${var.project_name} EKS cluster."
+  enabled         = true
+  is_ipv6_enabled = true
+  price_class     = "PriceClass_All"
+
+  origin = {
+    eks = {
+      origin_id   = "eks"
+      domain_name = aws_route53_record.alb.fqdn
+      custom_origin_config = {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "https-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+      custom_header = [{
+        name  = "X-Aperture-PSK-Auth"
+        value = random_uuid.psk.result
+      }]
+    }
+  }
+
+  default_cache_behavior = {
+    target_origin_id       = "eks"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["POST", "HEAD", "PATCH", "DELETE", "PUT", "GET", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+    compress        = true
+    query_string    = true
+
+    use_forwarded_values         = false
+    cache_policy_name            = "Managed-CachingDisabled"
+    origin_request_policy_name   = "Managed-AllViewer"
+    response_headers_policy_name = "Managed-CORS-With-Preflight"
+  }
+
+  viewer_certificate = {
+    acm_certificate_arn      = module.certificate_cloudfront.acm_certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}
+
 # Load Balancer
-module "nlb" {
+module "certificate_load_balancer" {
+  source = "terraform-aws-modules/acm/aws"
+
+  domain_name = "alb.${var.project_name}.${var.hosted_zone}"
+  zone_id     = aws_route53_zone.this.zone_id
+
+  validation_method = "DNS"
+
+  wait_for_validation = true
+}
+
+module "alb" {
   source = "terraform-aws-modules/alb/aws"
 
   name    = var.project_name
   vpc_id  = data.aws_vpc.this.id
   subnets = data.aws_subnets.public.ids
 
-  load_balancer_type         = "network"
+  load_balancer_type         = "application"
   enable_deletion_protection = false
+  preserve_host_header       = true
+  xff_header_processing_mode = "append" // "preserve"
 
-  security_group_name            = "${var.project_name}-nlb"
+  security_group_name            = "${var.project_name}-alb"
   security_group_use_name_prefix = false
-  security_group_description     = "TF: Security group used by the NLB for the ${var.project_name} cluster."
+  security_group_description     = "TF: Security group used by the ALB for the ${var.project_name} cluster."
   security_group_ingress_rules = {
     https = {
-      from_port   = 443
-      to_port     = 443
-      ip_protocol = "tcp"
-      description = "HTTPS web traffic"
-      cidr_ipv4   = "0.0.0.0/0"
+      from_port      = 443
+      to_port        = 443
+      ip_protocol    = "tcp"
+      description    = "TF: HTTPS web traffic"
+      prefix_list_id = data.aws_ec2_managed_prefix_list.cloudfront.id
     }
   }
   security_group_egress_rules = {
@@ -85,16 +155,32 @@ module "nlb" {
     }
   }
   security_group_tags = {
-    Name = "${var.project_name}-nlb"
+    Name = "${var.project_name}-alb"
   }
 
   listeners = {
     https = {
       port            = 443
-      protocol        = "TLS"
-      certificate_arn = module.acm.acm_certificate_arn
-      forward = {
-        target_group_key = "traefik"
+      protocol        = "HTTPS"
+      certificate_arn = module.certificate_load_balancer.acm_certificate_arn
+      fixed_response = {
+        content_type = "text/plain"
+        message_body = "Unauthorized"
+        status_code  = "401"
+      }
+      rules = {
+        default = {
+          actions = [{
+            type             = "forward"
+            target_group_key = "traefik"
+          }]
+          conditions = [{
+            http_header = {
+              http_header_name = "X-Aperture-PSK-Auth"
+              values           = [random_uuid.psk.result]
+            }
+          }]
+        }
       }
     }
   }
@@ -102,23 +188,39 @@ module "nlb" {
   target_groups = {
     traefik = {
       name_prefix       = "eks"
-      protocol          = "TLS"
+      protocol          = "HTTPS"
       port              = 443
       target_type       = "ip"
       create_attachment = false
+      health_check = {
+        enabled  = true
+        path     = "/ping"
+        port     = "9000"
+        protocol = "HTTP"
+      }
     }
   }
 }
 
 # Security group
-resource "aws_security_group_rule" "allow_nlb_to_worker_nodes_on_8443" {
+resource "aws_security_group_rule" "allow_alb_to_worker_nodes_on_8443" {
   security_group_id        = data.aws_security_group.this.id
-  description              = "TF: Allow NLB to communicate with worker nodes on port 8443"
+  description              = "TF: Allow ALB to communicate with worker nodes on port 8443"
   type                     = "ingress"
   protocol                 = "tcp"
   from_port                = 8443
   to_port                  = 8443
-  source_security_group_id = module.nlb.security_group_id
+  source_security_group_id = module.alb.security_group_id
+}
+
+resource "aws_security_group_rule" "allow_alb_to_worker_nodes_on_9000" {
+  security_group_id        = data.aws_security_group.this.id
+  description              = "TF: Allow ALB to do Traefik health check with worker nodes on port 9000"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 9000
+  to_port                  = 9000
+  source_security_group_id = module.alb.security_group_id
 }
 
 # DNS
@@ -134,14 +236,26 @@ resource "aws_route53_zone" "this" {
   name = "${var.project_name}.${var.hosted_zone}"
 }
 
+resource "aws_route53_record" "alb" {
+  zone_id = aws_route53_zone.this.zone_id
+  name    = "alb"
+  type    = "A"
+
+  alias {
+    zone_id                = module.alb.zone_id
+    name                   = module.alb.dns_name
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "star" {
   zone_id = aws_route53_zone.this.zone_id
   name    = "*"
   type    = "A"
 
   alias {
-    zone_id                = module.nlb.zone_id
-    name                   = module.nlb.dns_name
+    zone_id                = module.cdn.cloudfront_distribution_hosted_zone_id
+    name                   = module.cdn.cloudfront_distribution_domain_name
     evaluate_target_health = false
   }
 }

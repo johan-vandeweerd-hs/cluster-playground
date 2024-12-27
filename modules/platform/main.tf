@@ -37,6 +37,10 @@ module "external_secrets" {
 }
 
 module "ingress" {
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
   source = "./ingress"
 
   project_name = var.project_name
