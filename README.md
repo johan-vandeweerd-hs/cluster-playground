@@ -56,8 +56,8 @@ kubectl delete poddisruptionbudget -A --all
 kubectl delete nodepool --all
 kubectl delete nodeclaims --all
 kubectl delete ec2nodeclass --all
-terraform apply -target module.cluster -destroy
-terraform apply -target module.network -destroy
+terraform apply -target module.cluster -destroy -auto-approve
+terraform apply -target module.network -destroy -auto-approve
 ```
 
 You can use following AWS CLI command to get an idea of the resources that still exist.
