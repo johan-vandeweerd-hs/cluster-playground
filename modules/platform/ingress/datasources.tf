@@ -38,7 +38,3 @@ data "aws_security_group" "this" {
 data "aws_route53_zone" "this" {
   name = var.hosted_zone
 }
-
-data "aws_ec2_managed_prefix_list" "cloudfront" {
-  name = "com.amazonaws.global.cloudfront.origin-facing"
-}

@@ -29,17 +29,6 @@ provider "aws" {
   }
 }
 
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-
-  default_tags {
-    tags = {
-      Project = var.project_name
-    }
-  }
-}
-
 provider "kubectl" {
   host                   = module.cluster.kubernetes_endpoint
   cluster_ca_certificate = base64decode(module.cluster.kubernetes_certificate_authority_data)

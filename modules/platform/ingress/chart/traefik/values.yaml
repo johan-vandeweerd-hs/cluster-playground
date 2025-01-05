@@ -17,14 +17,6 @@ traefik:
       enabled: true
       ingressClass: ingress
 
-  ports:
-    web:
-      forwardedHeaders:
-        insecure: true
-    websecure:
-      forwardedHeaders:
-        insecure: true
-
   logs:
     general:
       format: json
