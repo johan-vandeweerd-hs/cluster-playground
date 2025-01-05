@@ -88,7 +88,7 @@ resource "helm_release" "this" {
 }
 
 resource "aws_iam_service_linked_role" "spot" {
-  count = length(data.aws_iam_roles.spot.names) > 0 ? 0 : 1
+  count = var.create_spot_service_linked_role ? 1 : 0
 
   aws_service_name = "spot.amazonaws.com"
 }

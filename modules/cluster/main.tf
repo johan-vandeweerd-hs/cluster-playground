@@ -36,6 +36,12 @@ module "karpenter" {
   kubernetes_oidc_provider_arn = module.eks.oidc_provider_arn
 
   private_subnet_ids = var.private_subnet_ids
+
+  create_spot_service_linked_role = length(data.aws_iam_roles.spot.names) == 0
+
+  depends_on = [
+    module.eks
+  ]
 }
 
 module "argocd" {

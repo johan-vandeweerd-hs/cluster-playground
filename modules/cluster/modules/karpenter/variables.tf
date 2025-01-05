@@ -17,3 +17,8 @@ variable "private_subnet_ids" {
   description = "The list of IDs of the private subnets to use."
   type        = list(string)
 }
+
+variable "create_spot_service_linked_role" {
+  description = "Whether to create the Spot service linked role."
+  type        = bool
+}
