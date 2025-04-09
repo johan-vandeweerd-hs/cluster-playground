@@ -27,3 +27,8 @@ variable "hosted_zone" {
   description = "The name of the hosted zone."
   type        = string
 }
+
+variable "letsencrypt_email" {
+  description = "The email address used by Let's Encrypt."
+  type        = string
+}

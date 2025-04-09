@@ -1,3 +1,8 @@
+variable "aws_region" {
+  description = "The AWS region to deploy the resources."
+  type        = string
+}
+
 variable "project_name" {
   description = "Name to use for the VPC, EKS cluster, etc and to use as prefix to name resources."
   type        = string
@@ -21,5 +26,10 @@ variable "git_private_ssh_key" {
 
 variable "hosted_zone" {
   description = "The hosted zone under which the project name is used as a subdomain for this project."
+  type        = string
+}
+
+variable "letsencrypt_email" {
+  description = "The email address used by Let's Encrypt."
   type        = string
 }

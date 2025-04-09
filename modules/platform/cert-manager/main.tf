@@ -9,8 +9,8 @@ resource "kubectl_manifest" "application" {
     gitUrl    = var.git_url
     revision  = var.git_revision
     helmParameters = {
-      awsRegion   = data.aws_region.this.name
-      clusterName = var.project_name
+      awsRegion = data.aws_region.this.name
+      email     = var.letsencrypt_email
     }
   })
 }

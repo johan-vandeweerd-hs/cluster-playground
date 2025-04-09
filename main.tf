@@ -36,7 +36,8 @@ module "platform" {
   kubernetes_oidc_provider     = module.cluster.kubernetes_oidc_provider
   kubernetes_oidc_provider_arn = module.cluster.kubernetes_oidc_provider_arn
 
-  hosted_zone = var.hosted_zone
+  hosted_zone       = var.hosted_zone
+  letsencrypt_email = var.letsencrypt_email
 }
 
 module "product" {
