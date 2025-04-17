@@ -1,6 +1,6 @@
 # ArgoCD applications
 resource "kubectl_manifest" "application_kubecost" {
-  yaml_body = templatefile("${path.module}/chart/kubecost/application.yaml", {
+  yaml_body = templatefile("${path.module}/chart/application.yaml", {
     name      = "kubecost"
     namespace = "kubecost"
     gitUrl    = var.git_url

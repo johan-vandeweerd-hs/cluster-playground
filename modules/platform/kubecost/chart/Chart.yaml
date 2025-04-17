@@ -2,6 +2,6 @@ apiVersion: v2
 name: kubecost
 version: 0.0.1
 dependencies:
-  - repository: oci://public.ecr.aws/kubecost/cost-analyzer
-    name: kubecost
-    version: 1.108.1
+  - repository: oci://public.ecr.aws/kubecost
+    name: cost-analyzer
+    version: 2.7.1
