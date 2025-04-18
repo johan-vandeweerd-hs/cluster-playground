@@ -20,5 +20,53 @@ module "eks_addons" {
       most_recent          = true
       configuration_values = jsonencode(yamldecode(file("${path.module}/coredns.yaml")))
     }
+    aws-ebs-csi-driver = {
+      most_recent          = true
+      configuration_values = jsonencode(yamldecode(file("${path.module}/aws-ebs-csi-driver.yaml")))
+    }
+  }
+}
+
+# AWS EBS CSI Driver
+module "iam_role_aws_ebs_csi_driver" {
+  source = "terraform-aws-modules/eks-pod-identity/aws"
+
+  name            = "${var.project_name}-aws-ebs-csi-driver"
+  description     = "TF: IAM role used by AWS EBS CSI driver."
+  use_name_prefix = "false"
+
+  attach_aws_ebs_csi_policy = true
+}
+
+resource "aws_eks_pod_identity_association" "aws_ebs_csi_driver" {
+  cluster_name    = var.project_name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_arn        = module.iam_role_aws_ebs_csi_driver.iam_role_arn
+}
+
+# StorageClass
+resource "kubernetes_manifest" "storage_class" {
+  manifest = {
+    apiVersion = "storage.k8s.io/v1"
+    kind       = "StorageClass"
+    metadata = {
+      annotations = {
+        "storageclass.kubernetes.io/is-default-class" = "true"
+      }
+      name = "ebs"
+    }
+    provisioner       = "ebs.csi.aws.com"
+    volumeBindingMode = "WaitForFirstConsumer"
+    allowedTopologies = [
+      {
+        matchLabelExpressions = [
+          {
+            key    = "topology.ebs.csi.aws.com/zone"
+            values = ["${data.aws_region.this.name}a"]
+          }
+        ]
+      }
+    ]
   }
 }

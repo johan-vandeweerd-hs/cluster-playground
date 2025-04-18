@@ -1,1 +1,36 @@
 kubecost:
+  global:
+    grafana:
+      enabled: false
+      proxy: false
+
+  kubecostFrontend:
+    image: public.ecr.aws/kubecost/frontend
+
+  kubecostModel:
+    image: public.ecr.aws/kubecost/cost-model
+
+  forecasting:
+    image:
+      repository: public.ecr.aws/kubecost/kubecost-modeling
+
+  networkCosts:
+    image:
+      repository: public.ecr.aws/kubecost/kubecost-network-costs
+
+  clusterController:
+    image:
+      repository: public.ecr.aws/kubecost/cluster-controller
+
+  prometheus:
+    server:
+      image:
+        repository: public.ecr.aws/kubecost/prometheus
+
+    configmapReload:
+      prometheus:
+        image:
+          repository: public.ecr.aws/kubecost/prometheus-config-reloader
+
+  reporting:
+    productAnalytics: false
