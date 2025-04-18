@@ -28,6 +28,14 @@ module "iam_role_kubecost_cost_analyzer" {
   description     = "TF: IAM role used by Kubecost cost analyzer."
   use_name_prefix = "false"
 
+  associations = {
+    "kube-system" = {
+      cluster_name    = var.project_name
+      namespace       = "kubecost"
+      service_account = "kubecost-cost-analyzer"
+    }
+  }
+
   additional_policy_arns = {
     AmpQueryAccess = "arn:aws:iam::aws:policy/AmazonPrometheusQueryAccess"
     AmpWriteAccess = "arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess"
@@ -40,6 +48,14 @@ module "iam_role_kubecost_prometheus_server" {
   name            = "${var.project_name}-kubecost-prometheus-server"
   description     = "TF: IAM role used by Kubecost Prometheus server."
   use_name_prefix = "false"
+
+  associations = {
+    "kube-system" = {
+      cluster_name    = var.project_name
+      namespace       = "kubecost"
+      service_account = "kubecost-prometheus-server"
+    }
+  }
 
   additional_policy_arns = {
     AmpQueryAccess = "arn:aws:iam::aws:policy/AmazonPrometheusQueryAccess"

@@ -36,13 +36,14 @@ module "iam_role_aws_ebs_csi_driver" {
   use_name_prefix = "false"
 
   attach_aws_ebs_csi_policy = true
-}
 
-resource "aws_eks_pod_identity_association" "aws_ebs_csi_driver" {
-  cluster_name    = var.project_name
-  namespace       = "kube-system"
-  service_account = "ebs-csi-controller-sa"
-  role_arn        = module.iam_role_aws_ebs_csi_driver.iam_role_arn
+  associations = {
+    "kube-system" = {
+      cluster_name    = var.project_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
+    }
+  }
 }
 
 # StorageClass
