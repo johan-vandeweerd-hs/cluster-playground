@@ -1,4 +1,4 @@
-kubecost:
+cost-analyzer:
   global:
     grafana:
       enabled: false

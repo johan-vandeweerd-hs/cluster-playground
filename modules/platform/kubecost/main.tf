@@ -3,50 +3,31 @@ locals {
 }
 
 # ArgoCD application
-resource "argocd_application" "this" {
-  metadata {
+resource "kubectl_manifest" "application_kubecost" {
+  yaml_body = templatefile("${path.module}/chart/application.yaml", {
     name      = local.module_name
-    namespace = "argocd"
-  }
-  spec {
-    project = "default"
-    source {
-      repo_url        = var.git_url
-      path            = "modules/platform/${local.module_name}/chart"
-      target_revision = var.git_revision
-      helm {
-        values = yamlencode({
-          kubecost = {
-            global = {
-              amp = {
-                enabled                  = true
-                prometheusServerEndpoint = "http://localhost:8005/workspaces/${aws_prometheus_workspace.this.id}"
-                remoteWriteService       = "https://aps-workspaces.${data.aws_region.this.name}.amazonaws.com/workspaces/${aws_prometheus_workspace.this.id}/api/v1/remote_write"
-              }
-              sigv4 = {
-                region = "${data.aws_region.this.name}"
-              }
-              sigV4Proxy = {
-                region = "${data.aws_region.this.name}"
-                host   = "aps-workspaces.${data.aws_region.this.name}.amazonaws.com"
-              }
-            }
+    namespace = local.module_name
+    gitUrl    = var.git_url
+    revision  = var.git_revision
+    values = indent(8, yamlencode({
+      cost-analyzer = {
+        global = {
+          amp = {
+            enabled                  = true
+            prometheusServerEndpoint = "http://localhost:8005/workspaces/${aws_prometheus_workspace.this.id}"
+            remoteWriteService       = "https://aps-workspaces.${data.aws_region.this.name}.amazonaws.com/workspaces/${aws_prometheus_workspace.this.id}/api/v1/remote_write"
           }
-        })
+          sigv4 = {
+            region = data.aws_region.this.name
+          }
+        }
+        sigV4Proxy = {
+          region = "${data.aws_region.this.name}"
+          host   = "aps-workspaces.${data.aws_region.this.name}.amazonaws.com"
+        }
       }
-    }
-    destination {
-      server    = "https://kubernetes.default.svc"
-      namespace = local.module_name
-    }
-    sync_policy {
-      automated {
-        prune     = true
-        self_heal = true
-      }
-      sync_options = ["CreateNamespace=true"]
-    }
-  }
+    }))
+  })
 }
 
 # Prometheus
