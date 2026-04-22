@@ -1,16 +1,3 @@
-resource "kubectl_manifest" "argocd_application_opentelemetryoperator" {
-  yaml_body = templatefile("${path.module}/applications/open-telemetry-operator/argocd-application.yaml", {
-    clusterArn = module.eks.cluster_arn
-  })
-
-  depends_on = [aws_eks_capability.argocd]
-}
-
-resource "aws_secretsmanager_secret" "open_telemetry" {
-  name        = "${var.project_name}/open-telemetry"
-  description = "TF: Secret used by OpenTelemetry."
-}
-
 resource "kubectl_manifest" "argocd_application_opentelemetrycollectors" {
   yaml_body = templatefile("${path.module}/applications/open-telemetry-collectors/argocd-application.yaml", {
     clusterArn = module.eks.cluster_arn
