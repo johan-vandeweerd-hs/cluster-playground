@@ -32,26 +32,6 @@ spec:
           fieldPath: status.podIP
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: "k8s.pod.name=$(K8S_POD_NAME),k8s.namespace.name=$(K8S_NAMESPACE),k8s.node.name=$(K8S_NODE_NAME),host.name=$(K8S_NODE_NAME),k8s.node.ip=$(K8S_NODE_IP),k8s.pod.ip=$(K8S_POD_IP),k8s.cluster.name=johan"
-    - name: GRAFANA_CLOUD_API_KEY
-      valueFrom:
-        secretKeyRef:
-          key: GRAFANA_CLOUD_API_KEY
-          name: open-telemetry
-    - name: GRAFANA_CLOUD_BASIC_AUTH_HEADER
-      valueFrom:
-        secretKeyRef:
-          key: GRAFANA_CLOUD_BASIC_AUTH_HEADER
-          name: open-telemetry
-    - name: GRAFANA_CLOUD_INSTANCE_ID
-      valueFrom:
-        secretKeyRef:
-          key: GRAFANA_CLOUD_INSTANCE_ID
-          name: open-telemetry
-    - name: GRAFANA_CLOUD_OTLP_ENDPOINT
-      valueFrom:
-        secretKeyRef:
-          key: GRAFANA_CLOUD_OTLP_ENDPOINT
-          name: open-telemetry
   priorityClassName: system-node-critical
   imagePullPolicy: Always
   resources:
@@ -84,20 +64,10 @@ spec:
   targetAllocator:
     enabled: true
   config:
-    connectors:
-      grafanacloud/connector:
-        host_identifiers:
-          - host.id
-          - k8s.node.uid
-          - k8s.node.name
     extensions:
-      basicauth/grafana_cloud:
-        client_auth:
-          username: ${env:GRAFANA_CLOUD_INSTANCE_ID}
-          password: ${env:GRAFANA_CLOUD_API_KEY}
-      k8s_observer:
-        auth_type: serviceAccount
-        node: ${env:K8S_NODE_NAME}
+      sigv4auth:
+        region: {{ .Values.aws.region }}
+        service: aps
     receivers:
       prometheus:
         config:
@@ -121,6 +91,9 @@ spec:
                   regex: (.+)
                   replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
               metric_relabel_configs:
+                - action: keep
+                  source_labels: [__name__]
+                  regex: container_cpu_usage_seconds_total|container_memory_working_set_bytes|container_memory_usage_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_fs_usage_bytes
                 - source_labels: [ pod ]
                   regex: ([a-z\-]+)\-[a-z0-9]+(\-[a-z0-9]+)?$
                   replacement: $1
@@ -130,6 +103,9 @@ spec:
               kubernetes_sd_configs:
                 - role: pod
               relabel_configs:
+                - source_labels: [ __meta_kubernetes_namespace ]
+                  action: keep
+                  regex: default
                 - action: keep
                   source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scrape ]
                   regex: true
@@ -154,7 +130,7 @@ spec:
                 - action: replace
                   source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_path ]
                   regex: (.+)
-                  target_label: __metrics_path__±
+                  target_label: __metrics_path__
     #              metric_relabel_configs:
     #                - action: keep
     #                  source_labels: [ __name__ ]
@@ -163,7 +139,7 @@ spec:
       batch:
         send_batch_max_size: 1500
         send_batch_size: 1000
-        timeout: 1s
+        timeout: 10s
       k8sattributes:
         extract:
           labels:
@@ -197,10 +173,6 @@ spec:
             - service.name
             - service.version
             - service.instance.id
-          otel_annotations: true
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-        passthrough: false
         pod_association:
           - sources:
               - from: resource_attribute
@@ -234,14 +206,19 @@ spec:
         override: false
         timeout: 2s
     exporters:
-      otlp_http/grafana_cloud:
+      prometheusremotewrite:
         auth:
-          authenticator: basicauth/grafana_cloud
-        endpoint: ${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
+          authenticator: sigv4auth
+        endpoint: {{ .Values.prometheus.endpoint }}api/v1/remote_write
+        max_batch_size_bytes: 1000000
+        resource_to_telemetry_conversion:
+          enabled: true
     service:
+      telemetry:
+        logs:
+          level: info
       extensions:
-        - basicauth/grafana_cloud
-        - k8s_observer
+        - sigv4auth
       pipelines:
         metrics:
           receivers:
@@ -252,32 +229,4 @@ spec:
             - resource/hostname
             - batch
           exporters:
-            - otlp_http/grafana_cloud
-      telemetry:
-        logs:
-          processors:
-            - batch:
-                exporter:
-                  otlp:
-                    endpoint: ${env:GRAFANA_CLOUD_OTLP_ENDPOINT}/v1/logs
-                    headers:
-                      - name: authorization
-                        value: ${env:GRAFANA_CLOUD_BASIC_AUTH_HEADER}
-                    protocol: http/protobuf
-        metrics:
-          readers:
-            - periodic:
-                exporter:
-                  otlp:
-                    endpoint: ${env:GRAFANA_CLOUD_OTLP_ENDPOINT}/v1/metrics
-                    headers:
-                      - name: authorization
-                        value: ${env:GRAFANA_CLOUD_BASIC_AUTH_HEADER}
-                    protocol: http/protobuf
-        resource:
-          host.name: ${env:K8S_NODE_NAME}
-          k8s.namespace.name: ${env:K8S_NAMESPACE}
-          k8s.node.name: ${env:K8S_NODE_NAME}
-          k8s.node.ip: ${env:K8S_NODE_IP}
-          k8s.pod.name: ${env:K8S_POD_NAME}
-          k8s.pod.ip: ${env:K8S_POD_IP}
+            - prometheusremotewrite

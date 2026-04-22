@@ -13,10 +13,7 @@ spec:
     targetRevision: obi
     helm:
       valuesObject:
-        aws:
-          region: ${awsRegion}
-        roleArn: ${roleArn}
-        secretsKey: ${secretsKey}
+        ${indent(8, yamlencode(valuesObject))}
   destination:
     server: ${clusterArn}
     namespace: open-telemetry
