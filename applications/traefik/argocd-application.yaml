@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/johan-vandeweerd-hs/cluster-playground
     path: applications/traefik
-    targetRevision: observability
+    targetRevision: obi
     helm:
       valuesObject:
         targetGroupArn: ${targetGroupArn}

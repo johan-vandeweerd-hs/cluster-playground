@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/johan-vandeweerd-hs/cluster-playground
     path: applications/audit-service
-    targetRevision: observability
+    targetRevision: obi
     helm:
       valuesObject:
         kafka:
