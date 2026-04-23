@@ -10,6 +10,9 @@ resource "kubectl_manifest" "argocd_application_opentelemetryoperator" {
         }
       }
       manager = {
+        collectorImage = {
+          repository = "otel/opentelemetry-collector-contrib"
+        }
         autoInstrumentation = {
           go = {
             enabled = true
