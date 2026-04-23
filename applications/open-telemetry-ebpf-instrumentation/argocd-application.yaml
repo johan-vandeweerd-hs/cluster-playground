@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-telemetry-ebpf-instrumentation
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    chart: opentelemetry-ebpf-instrumentation
+    targetRevision: 0.7.2
+    helm:
+      valuesObject:
+        ${indent(8, yamlencode(valuesObject))}
+  destination:
+    server: ${clusterArn}
+    namespace: open-telemetry-ebpf-instrumentation
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
