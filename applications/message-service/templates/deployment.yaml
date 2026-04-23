@@ -12,9 +12,6 @@ spec:
       app: message-service
   template:
     metadata:
-      annotations:
-        instrumentation.opentelemetry.io/inject-go: "true"
-        instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/service"
       labels:
         app: message-service
     spec:
